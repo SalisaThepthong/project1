@@ -1,0 +1,43 @@
+
+
+Model ในบริบทของการพัฒนาแอปพลิเคชันหรือซอฟต์แวร์หมายถึง:
+
+1.การเป็นตัวแทนของข้อมูล: Model เป็นตัวแทนของข้อมูลในแอปพลิเคชัน โดยมันจะเก็บโครงสร้างและตรรกะที่เกี่ยวข้องกับข้อมูล 
+                        เช่น ตารางฐานข้อมูล, ข้อมูลผู้ใช้, รายการสินค้า เป็นต้น
+
+2.แยกความรับผิดชอบออกจากกัน (Separation of Concerns): 
+    การแยก Model ออกมาทำให้การจัดการข้อมูลมีความชัดเจนและมีการแยกความรับผิดชอบระหว่างส่วนประกอบของแอปพลิเคชัน
+                (เช่น Model, View, Controller หรือ ViewModel) ซึ่งช่วยให้โค้ดมีความสะอาดและจัดการได้ง่ายขึ้น
+
+
+โค้ดตัวอย่างของ Model:
+class Student {
+  final int id;
+  final String name;
+  final String email;
+
+  Student({required this.id, required this.name, required this.email});
+
+  // วิธีแปลง JSON เป็น Object
+  factory Student.fromJson(Map<String, dynamic> json) {
+    return Student(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+    );
+  }
+
+  // วิธีแปลง Object เป็น JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+    };
+  }
+}
+
+คำอธิบาย:
+Fields (id, name, email): ตัวแปรที่เก็บข้อมูลของนักศึกษา
+Constructor: ฟังก์ชันที่ใช้สร้างอินสแตนซ์ของคลาส Student
+fromJson และ toJson: เมธอดที่ใช้แปลงข้อมูลระหว่างรูปแบบ JSON (ที่ได้จาก API หรือฐานข้อมูล) และออบเจ็กต์ (object) ของคลาส
