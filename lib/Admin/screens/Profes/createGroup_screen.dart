@@ -1,11 +1,11 @@
 // นำเข้าไลบรารีต่าง ๆ ที่ใช้ในโปรเจ็กต์
 import 'dart:convert'; // ใช้สำหรับแปลงข้อมูลเป็น JSON
 import 'package:flutter/material.dart'; // ใช้สำหรับสร้าง UI
-import 'package:http/http.dart' as http; // ใช้สำหรับส่งคำขอ HTTP
+import 'package:http/http.dart' as http;
+//import 'package:myproject/Admin/screens/Profes/showGroupProfes_screen.dart'; // ใช้สำหรับส่งคำขอ HTTP
 
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
-
   @override
   // ignore: library_private_types_in_public_api
   _CreateGroupScreenState createState() => _CreateGroupScreenState();
@@ -14,8 +14,9 @@ class CreateGroupScreen extends StatefulWidget {
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final List<Map<String, String?>> _members = []; // รายการเก็บข้อมูลสมาชิก
   final _formKey = GlobalKey<FormState>(); // คีย์สำหรับจัดการฟอร์ม
- final List<String> _prefixOptions = ['นาย','นางสาว','ดร.','อ.','อ.ดร.','ผศ.','ผศ.ดร.','รศ.','รศ.ดร.','ศ.','ศ.ดร.'];
- // ตัวเลือกคำนำหน้าชื่อ
+  final List<String> _prefixOptions = ['นาย','นางสาว','ดร.','อ.','อ.ดร.', 'ผศ.','ผศ.ดร.', 'รศ.', 'รศ.ดร.', 'ศ.','ศ.ดร.'
+  ];
+  // ตัวเลือกคำนำหน้าชื่อ
 
   String _groupNumber = ''; // เก็บข้อมูลเลขกลุ่ม
   String _groupName = ''; // เก็บข้อมูลชื่อกลุ่ม
@@ -82,21 +83,46 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           });
         } else {
           // แสดงข้อความเมื่อเกิดข้อผิดพลาด
-          // ignore: use_build_context_synchronously
+         
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึกข้อมูล')),
           );
         }
       } catch (e) {
         // แสดงข้อความเมื่อไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้
-        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้')),
         );
       }
     }
   }
-
+    //ฟังชั่นสำหรับแสดง Dialog ยืนยันการเพิ่มข้อมูล-------------------------------
+  Future<void> showSuccessDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('ยืนยันการเพิ่มข้อมูล'),
+          content: Text('คุณต้องการเพิ่มข้อมูลนี้ลงในฐานข้อมูลหรือไม่?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('ยกเลิก'),
+              onPressed: () {
+                Navigator.of(context).pop(); // ปิด Dialog
+              },
+            ),
+            TextButton(
+              child: Text('ยืนยัน'),
+              onPressed: () {
+                Navigator.of(context).pop(); // ปิด Dialog
+                _submitData(); // เรียกฟังก์ชันที่ส่งข้อมูลไปยัง API
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +143,17 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ฟิลด์กรอกชื่อกลุ่ม
+                const Text(
+                  'กรอกชื่อกลุ่มของคุณ', // ข้อความที่คุณต้องการแสดง
+                  style: TextStyle(
+                    fontSize: 20.0, // ขนาดตัวอักษร
+                    fontWeight: FontWeight.bold, // ความหนาของตัวอักษร
+                    color: Color.fromARGB(255, 41, 38, 38), // สีของตัวอักษร
+                  ),
+                ),
+                const SizedBox(
+                    height: 20.0), // เว้นระยะห่างระหว่างข้อความและฟิลด์กรอก
+
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8.0, vertical: 8.0),
@@ -183,8 +219,16 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('สมาชิกกลุ่ม'), // หัวข้อส่วนสมาชิกกลุ่ม
-                const SizedBox(height: 8),
+                const Text(
+                  'เพิ่มสมาชิกกลุ่มของคุณ', // ข้อความที่คุณต้องการแสดง
+                  style: TextStyle(
+                    fontSize: 20.0, // ขนาดตัวอักษร
+                    fontWeight: FontWeight.bold, // ความหนาของตัวอักษร
+                    color: Color.fromARGB(255, 41, 38, 38), // สีของตัวอักษร
+                  ),
+                ),
+
+                const SizedBox(height: 5),
                 // รายการสมาชิกของกลุ่ม
                 ListView.builder(
                   shrinkWrap: true,
@@ -276,15 +320,25 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             // ปุ่มลบสมาชิกออกจากกลุ่ม
                             Align(
                               alignment: Alignment.centerRight,
-                              child: IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  setState(() {
-                                    _members
-                                        .removeAt(index); // ลบสมาชิกออกจากกลุ่ม
-                                  });
-                                },
+                              child: Row(
+                                mainAxisSize: MainAxisSize
+                                    .min, // ขนาดของ Row จะเป็นขนาดของเนื้อหา
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        _members.removeAt(
+                                            index); // ลบสมาชิกออกจากกลุ่ม
+                                      });
+                                    },
+                                  ),
+                                  const SizedBox(
+                                      width:
+                                          2.0), // เว้นระยะห่างระหว่างไอคอนและข้อความ
+                                  const Text('ลบสมาชิก'),
+                                ],
                               ),
                             ),
                           ],
@@ -305,7 +359,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       style: TextStyle(
                           color: Colors.black)), // ข้อความในปุ่ม, ปรับเป็นสีดำ
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 174, 224, 172)
+                    backgroundColor: const Color.fromARGB(255, 238, 241, 238)
                         .withOpacity(0.9), // สีพื้นหลังขาวนวลๆ
                     shape: RoundedRectangleBorder(
                       borderRadius:
@@ -320,26 +374,22 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
                 const SizedBox(height: 16),
                 // ปุ่มบันทึกข้อมูลทั้งหมด-----------------------------------
-                ElevatedButton(
-                  onPressed: _submitData, // ฟังก์ชันที่ทำงานเมื่อกดปุ่ม
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors
-                        .orange, // เปลี่ยนสีปุ่มเป็นสีส้มให้เหมือนปุ่ม Finish
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0), // มุมปุ่มโค้งมน
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16.0), // ระยะห่างแนวตั้งของปุ่ม
-                    minimumSize: const Size(
-                        double.infinity, 50), // กำหนดขนาดปุ่มเท่ากับปุ่ม Finish
-                  ),
-                  child: const Text(
-                    'บันทึกข้อมูล',
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: Color.fromARGB(255, 0, 0, 0)), // สไตล์ข้อความในปุ่ม
-                  ),
+               ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    showSuccessDialog(); // แสดง Dialog สำหรับยืนยันการบันทึก
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('กรุณาตรวจสอบข้อมูลอีกครั้ง')),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // สีของปุ่ม
+                  minimumSize: Size(double.infinity, 50), // ความยาวของปุ่ม
                 ),
+                child: Text('Finish'),
+              ),
               ],
             ),
           ),

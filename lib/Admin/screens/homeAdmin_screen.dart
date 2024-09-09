@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:myproject/Admin/widgets/menu_item.dart';
 import 'package:myproject/Admin/screens/subject/showCourse_screen.dart';
-import 'package:myproject/Admin/screens/Profes/createGroup_screen.dart';
+import 'package:myproject/Admin/screens/Profes/showGroupProfes_screen.dart';
+
+// หน้าจอหลักของแอป (HomeScreen)
 
 void main() {
   runApp(MyApp());
@@ -57,7 +59,7 @@ class HomeScreen extends StatelessWidget {
                   'icon': Icons.person,
                   'text': 'อาจารย์',
                   'color': Colors.orange.shade100,
-                  'screen': CreateGroupScreen()
+                  'screen':  GroupListScreen()
                 },
                 {
                   'icon': Icons.person_off,
@@ -123,6 +125,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
 
 // หน้าต่าง ๆ ที่จะนำทางไป
 class TeacherScreen extends StatelessWidget {

@@ -147,29 +147,31 @@ def add_group_and_members():
 
 @app.route('/groups', methods=['GET'])
 def get_groups():
-    groups = ContactGroup.query.all()
-    results = []
-    for group in groups:
-        group_data = {
-            'id_Group': group.id_Group,
-            'group_Number': group.group_Number,
-            'group_Name': group.group_Name,
-            'group_Photo': group.group_Photo,
-            'members': []
-        }
-        for member in group.members:
-            member_data = {
-                'id_Member': member.id_Member,
-                'member_Prefix': member.member_Prefix,
-                'member_Name': member.member_Name,
-                'member_Lname': member.member_Lname,
-                'member_Email': member.member_Email,
-                'member_Facebook': member.member_Facebook,
-                'member_Photo': member.member_Photo
-            }
-            group_data['members'].append(member_data)
-        results.append(group_data)
-    return jsonify(results), 200
+    try:
+        groups = ContactGroup.query.all()
+        result = []
+        for group in groups:
+            members = ContactProfes.query.filter_by(id_Group=group.id_Group).all()
+            member_list = [
+                {
+                    'id': member.id_Member,
+                    'prefix': member.member_Prefix,
+                    'name': member.member_Name,
+                    'lastName': member.member_Lname,
+                    'email': member.member_Email,
+                    'facebook': member.member_Facebook
+                }
+                for member in members
+            ]
+            result.append({
+                'id': group.id_Group,
+                'name': group.group_Name,
+                'members': member_list
+            })
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
 
 
 
