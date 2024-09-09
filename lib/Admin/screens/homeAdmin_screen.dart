@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myproject/Admin/widgets/menu_item.dart';
-import 'package:myproject/Admin/screens/showCourse_screen.dart';
+import 'package:myproject/Admin/screens/subject/showCourse_screen.dart';
 import 'package:myproject/Admin/screens/Profes/createGroup_screen.dart';
 
 void main() {

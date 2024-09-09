@@ -32,38 +32,10 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
     //_fetchSubjectDetails();
   }
 
-  // Future<void> _fetchSubjectDetails() async {
-  //   final String baseUrl = isEmulator ? emulatorIp : physicalIp;
-  //   final Uri url = Uri.parse("$baseUrl/get_subject/${widget.subjectId}");
-
-  //   try {
-  //     final response = await http.get(url);
-
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-  //       setState(() {
-  //         _courseCodeController.text = data['courseCode'];
-  //         _nameController.text = data['name_Subjects'];
-  //         _selectedBranch = data['branchIT'] == 1
-  //             ? (data['branchCS'] == 1 ? 'IT & CS' : 'IT')
-  //             : (data['branchCS'] == 1 ? 'CS' : 'IT');
-  //       });
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Failed to load subject details: ${response.reasonPhrase}')),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('An error occurred: $e')),
-  //     );
-  //   }
-  // }
-
   Future<void> _updateSubject() async {
     final String baseUrl = isEmulator ? emulatorIp : physicalIp;
     final Uri url = Uri.parse("$baseUrl/update_subject/${widget.subjectId}");
-
+    print(baseUrl);
     final response = await http.put(
       url,
       headers: <String, String>{

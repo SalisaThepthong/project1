@@ -3,21 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AddSubjectScreen extends StatefulWidget {
+  //เป็นคลาสหลักของหน้าจอ
   @override
-  _AddSubjectScreenState createState() => _AddSubjectScreenState();
+  _AddSubjectScreenState createState() =>
+      _AddSubjectScreenState(); //เป็น State ของมัน
+  //_AddSubjectScreenState: รับผิดชอบการจัดการ UI และฟังก์ชันการทำงานของหน้าจอ
 }
 
 class _AddSubjectScreenState extends State<AddSubjectScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _courseCodeController = TextEditingController();
+  final TextEditingController _courseCodeController =
+      TextEditingController(); //ตัวควบคุมข้อความ (TextEditingController) สำหรับเก็บค่ารหัสวิชาและชื่อวิชา
   final TextEditingController _nameController = TextEditingController();
   String _selectedBranch = 'IT'; // ค่าเริ่มต้นของสาขา
-  List<String> branches = ['IT', 'CS', 'IT & CS']; // รายการสาขาที่ใช้
-
-  // กำหนดที่อยู่ IP สำหรับ emulator
+  List<String> branches = [
+    'IT',
+    'CS',
+    'IT & CS'
+  ]; // รายการตัวเลือกสาขาที่สามารถเลือกได้
   final String emulatorIp = 'http://10.0.2.2:5000'; // IP สำหรับ emulator
 
+//ฟังชั่นสำหรับบันทึกข้อมูล-----------------------------------------------------------
   Future<void> saveSubject() async {
     final Uri url = Uri.parse("$emulatorIp/add_subject");
 
@@ -29,12 +36,14 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       body: jsonEncode(<String, dynamic>{
         'courseCode': _courseCodeController.text,
         'name_Subjects': _nameController.text,
-        'branchIT': _selectedBranch == 'IT' || _selectedBranch == 'IT & CS' ? 1 : 0,
-        'branchCS': _selectedBranch == 'CS' || _selectedBranch == 'IT & CS' ? 1 : 0,
+        'branchIT':
+            _selectedBranch == 'IT' || _selectedBranch == 'IT & CS' ? 1 : 0,
+        'branchCS':
+            _selectedBranch == 'CS' || _selectedBranch == 'IT & CS' ? 1 : 0,
       }),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201) {//ถ้าคำขอสำเร็จ 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('บันทึกข้อมูลสำเร็จ!')),
       );
@@ -44,6 +53,7 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       setState(() {
         _selectedBranch = branches[0]; // รีเซ็ตค่า Dropdown เป็นค่าเริ่มต้น
       });
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึกข้อมูล')),
@@ -51,6 +61,7 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
     }
   }
 
+  //ฟังชั่นสำหรับแสดง Dialog ยืนยันการเพิ่มข้อมูล-------------------------------
   Future<void> showSuccessDialog() async {
     showDialog(
       context: context,
@@ -77,7 +88,10 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       },
     );
   }
+//------------------------------------------------------------------------
 
+
+//เมธอด build:สร้าง UI ของหน้าจอ โดยใช้ Scaffold และ AppBar
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,11 +105,12 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Form(
+        child: Form(//มีฟิลด์สำหรับใส่รหัสวิชา, ชื่อวิชา และเลือกสาขา 
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+      //-------------------------------------------------------
               TextFormField(
                 controller: _courseCodeController,
                 decoration: InputDecoration(
@@ -104,7 +119,8 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
                     borderRadius: BorderRadius.circular(10.0), // ขอบมนของกรอบ
                     borderSide: BorderSide.none, // ไม่ต้องการเส้นขอบ
                   ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                   filled: true,
                   fillColor: Colors.grey[200], // สีพื้นหลังของช่องกรอกข้อมูล
                 ),
@@ -115,7 +131,10 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
                   return null;
                 },
               ),
+
               SizedBox(height: 10),
+
+//---------------------------------------------------------------------
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -124,7 +143,8 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
                     borderRadius: BorderRadius.circular(10.0), // ขอบมนของกรอบ
                     borderSide: BorderSide.none, // ไม่ต้องการเส้นขอบ
                   ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                   filled: true,
                   fillColor: Colors.grey[200], // สีพื้นหลังของช่องกรอกข้อมูล
                 ),
@@ -136,6 +156,7 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
                 },
               ),
               SizedBox(height: 10),
+//-----------------------------------------------------------------------
               DropdownButtonFormField<String>(
                 value: _selectedBranch,
                 items: branches.map((String branch) {
@@ -155,12 +176,15 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
                     borderRadius: BorderRadius.circular(10.0), // ขอบมนของกรอบ
                     borderSide: BorderSide.none, // ไม่ต้องการเส้นขอบ
                   ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                   filled: true,
                   fillColor: Colors.grey[200], // สีพื้นหลังของช่องกรอกข้อมูล
                 ),
               ),
               SizedBox(height: 20),
+              
+  //-ปุ่ม Finish ---------------------------------------------------------
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {

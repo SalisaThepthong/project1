@@ -1,197 +1,350 @@
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+// นำเข้าไลบรารีต่าง ๆ ที่ใช้ในโปรเจ็กต์
+import 'dart:convert'; // ใช้สำหรับแปลงข้อมูลเป็น JSON
+import 'package:flutter/material.dart'; // ใช้สำหรับสร้าง UI
+import 'package:http/http.dart' as http; // ใช้สำหรับส่งคำขอ HTTP
 
 class CreateGroupScreen extends StatefulWidget {
+  const CreateGroupScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _CreateGroupScreenState createState() => _CreateGroupScreenState();
 }
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
-  final List<Map<String, String>> _members = [];
-  final _formKey = GlobalKey<FormState>();
-  File? _groupImage;
-  final ImagePicker _picker = ImagePicker();
+  final List<Map<String, String?>> _members = []; // รายการเก็บข้อมูลสมาชิก
+  final _formKey = GlobalKey<FormState>(); // คีย์สำหรับจัดการฟอร์ม
+ final List<String> _prefixOptions = ['นาย','นางสาว','ดร.','อ.','อ.ดร.','ผศ.','ผศ.ดร.','รศ.','รศ.ดร.','ศ.','ศ.ดร.'];
+ // ตัวเลือกคำนำหน้าชื่อ
 
+  String _groupNumber = ''; // เก็บข้อมูลเลขกลุ่ม
+  String _groupName = ''; // เก็บข้อมูลชื่อกลุ่ม
+
+  // ฟังก์ชันเพิ่มสมาชิกใหม่เข้าในกลุ่ม
   void _addMember() {
     setState(() {
       _members.add({
+        'prefix': _prefixOptions[0], // คำนำหน้าชื่อเริ่มต้น
         'name': '',
+        'lname': '',
         'email': '',
         'facebook': '',
-        'position': '',
       });
     });
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _groupImage = File(pickedFile.path);
-      });
-    }
-  }
+  // ฟังก์ชันส่งข้อมูลฟอร์มไปยัง Backend
+  Future<void> _submitData() async {
+    // ตรวจสอบการกรอกข้อมูลในฟอร์ม
+    if (_formKey.currentState!.validate()) {
+      final groupId =
+          'G${DateTime.now().millisecondsSinceEpoch}'; // สร้าง ID กลุ่ม
+      final groupNumber = _groupNumber;
+      final groupName = _groupName;
 
-  Future<void> _takePhoto() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      setState(() {
-        _groupImage = File(pickedFile.path);
+      final uri = Uri.parse(
+          'http://10.0.2.2:5000/add_group_and_members'); // URL ของ API
+
+      // เตรียมข้อมูลเป็น JSON
+      final body = jsonEncode({
+        'group_number': groupNumber,
+        'group_name': groupName,
+        'members': _members
+            .map((member) => {
+                  'member_prefix': member['prefix'] ?? '',
+                  'member_name': member['name'] ?? '',
+                  'member_lname': member['lname'] ?? '',
+                  'member_email': member['email'] ?? '',
+                  'member_facebook': member['facebook'] ?? ''
+                })
+            .toList(),
       });
+
+      // ส่งคำขอ POST ไปยังเซิร์ฟเวอร์
+      try {
+        final response = await http.post(
+          uri,
+          headers: {'Content-Type': 'application/json'},
+          body: body,
+        );
+
+        if (response.statusCode == 201) {
+          // แสดงข้อความเมื่อบันทึกข้อมูลสำเร็จ
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('บันทึกข้อมูลกลุ่มและสมาชิกสำเร็จ!')),
+          );
+          // เคลียร์ข้อมูลฟอร์ม
+          setState(() {
+            _groupNumber = '';
+            _groupName = '';
+            _members.clear();
+          });
+        } else {
+          // แสดงข้อความเมื่อเกิดข้อผิดพลาด
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึกข้อมูล')),
+          );
+        }
+      } catch (e) {
+        // แสดงข้อความเมื่อไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-       return Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'เพิ่มข้อมูลกลุ่ม',
-          style: TextStyle(color: Colors.white), // สีข้อความใน AppBar
+          style: TextStyle(color: Colors.white),
         ),
-        centerTitle: true, // ทำให้ข้อความอยู่ตรงกลาง
-        backgroundColor: Colors.teal, // สีพื้นหลังของ AppBar
+        centerTitle: true,
+        backgroundColor: Colors.teal, // กำหนดสีของ AppBar
       ),
+      backgroundColor: Colors.grey[200],
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
-            key: _formKey,
+            key: _formKey, // กำหนดคีย์ฟอร์ม
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ชื่อกลุ่ม
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'ชื่อกลุ่ม'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'กรุณากรอกชื่อกลุ่ม';
-                    }
-                    return null;
-                  },
-                ),
-                // เลขกลุ่ม
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'เลขกลุ่ม'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'กรุณากรอกเลขกลุ่ม';
-                    }
-                    return null;
-                  },
-                ),
-                // รูปกลุ่ม
-                SizedBox(height: 16),
-                _groupImage == null
-                    ? Text('กรุณาเลือกหรือถ่ายรูปกลุ่ม')
-                    : Image.file(
-                        _groupImage!,
-                        height: 150,
-                        width: 150,
-                        fit: BoxFit.cover,
+                // ฟิลด์กรอกชื่อกลุ่ม
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(color: Colors.grey[400]!, width: 1.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
                       ),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      child: Text('เลือกจากแกลเลอรี'),
-                    ),
-                    SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: _takePhoto,
-                      child: Text('ถ่ายรูปใหม่'),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                // สมาชิกกลุ่ม
-                for (int i = 0; i < _members.length; i++)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'ชื่อสมาชิก'),
-                        onChanged: (value) {
-                          setState(() {
-                            _members[i]['name'] = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'กรุณากรอกชื่อสมาชิก';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'อีเมล'),
-                        onChanged: (value) {
-                          setState(() {
-                            _members[i]['email'] = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'กรุณากรอกอีเมล';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'Facebook'),
-                        onChanged: (value) {
-                          setState(() {
-                            _members[i]['facebook'] = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'กรุณากรอก Facebook';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'Position'),
-                        onChanged: (value) {
-                          setState(() {
-                            _members[i]['position'] = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'กรุณากรอกตำแหน่ง';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
                     ],
                   ),
-                // ปุ่มเพิ่มสมาชิกใหม่
-                ElevatedButton(
-                  onPressed: _addMember,
-                  child: Text('เพิ่มสมาชิกใหม่'),
+                  child: TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'ชื่อกลุ่ม',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'กรุณากรอกชื่อกลุ่ม'; // ตรวจสอบว่ากรอกชื่อกลุ่มหรือไม่
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      _groupName = value; // เก็บข้อมูลชื่อกลุ่ม
+                    },
+                  ),
                 ),
-                // ปุ่มยืนยัน
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // โค้ดสำหรับส่งข้อมูลไปยัง server หรือ database
-                    }
+                const SizedBox(height: 16),
+                // ฟิลด์กรอกเลขกลุ่ม
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(color: Colors.grey[400]!, width: 1.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'เลขกลุ่ม',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'กรุณากรอกเลขกลุ่ม'; // ตรวจสอบว่ากรอกเลขกลุ่มหรือไม่
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      _groupNumber = value; // เก็บข้อมูลเลขกลุ่ม
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('สมาชิกกลุ่ม'), // หัวข้อส่วนสมาชิกกลุ่ม
+                const SizedBox(height: 8),
+                // รายการสมาชิกของกลุ่ม
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _members.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8.0),
+                          border:
+                              Border.all(color: Colors.grey[400]!, width: 1.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ช่องเลือกคำนำหน้าชื่อของสมาชิก
+                            DropdownButtonFormField<String>(
+                              value: _members[index]['prefix'],
+                              items: _prefixOptions.map((prefix) {
+                                return DropdownMenuItem<String>(
+                                  value: prefix,
+                                  child: Text(prefix),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _members[index]['prefix'] =
+                                      value; // กำหนดคำนำหน้าชื่อสมาชิก
+                                });
+                              },
+                              decoration: const InputDecoration(
+                                  labelText: 'คำนำหน้าชื่อ'),
+                            ),
+                            const SizedBox(height: 8),
+                            // ฟิลด์กรอกชื่อสมาชิก
+                            TextFormField(
+                              decoration:
+                                  const InputDecoration(labelText: 'ชื่อ'),
+                              onChanged: (value) {
+                                _members[index]['name'] =
+                                    value; // เก็บข้อมูลชื่อสมาชิก
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            // ฟิลด์กรอกนามสกุลสมาชิก
+                            TextFormField(
+                              decoration:
+                                  const InputDecoration(labelText: 'นามสกุล'),
+                              onChanged: (value) {
+                                _members[index]['lname'] =
+                                    value; // เก็บข้อมูลนามสกุลสมาชิก
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            // ฟิลด์กรอกอีเมลสมาชิก
+                            TextFormField(
+                              decoration:
+                                  const InputDecoration(labelText: 'อีเมล'),
+                              keyboardType: TextInputType.emailAddress,
+                              onChanged: (value) {
+                                _members[index]['email'] =
+                                    value; // เก็บข้อมูลอีเมลสมาชิก
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            // ฟิลด์กรอกข้อมูล Facebook ของสมาชิก
+                            TextFormField(
+                              decoration:
+                                  const InputDecoration(labelText: 'เฟซบุ๊ก'),
+                              onChanged: (value) {
+                                _members[index]['facebook'] =
+                                    value; // เก็บข้อมูล Facebook ของสมาชิก
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            // ปุ่มลบสมาชิกออกจากกลุ่ม
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  setState(() {
+                                    _members
+                                        .removeAt(index); // ลบสมาชิกออกจากกลุ่ม
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   },
-                  child: Text('ยืนยัน'),
+                ),
+                const SizedBox(height: 16),
+                // ปุ่มเพิ่มสมาชิกใหม่-----------------------------------
+
+                ElevatedButton.icon(
+                  onPressed: _addMember, // ฟังก์ชันที่ทำงานเมื่อกดปุ่ม
+                  icon: const Icon(Icons.add,
+                      color: Colors
+                          .black), // ไอคอนรูป add, สีไอคอนเป็นสีดำเพื่อให้ตัดกับพื้นหลัง
+                  label: const Text('เพิ่มสมาชิกใหม่  ',
+                      style: TextStyle(
+                          color: Colors.black)), // ข้อความในปุ่ม, ปรับเป็นสีดำ
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 174, 224, 172)
+                        .withOpacity(0.9), // สีพื้นหลังขาวนวลๆ
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(20.0), // มุมปุ่มโค้งมน
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15.0), // ระยะห่างแนวตั้งของปุ่ม
+                    shadowColor: Colors.grey
+                        .withOpacity(0.8), // เพิ่มเงาเบาๆ เพื่อให้ปุ่มโดดเด่น
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+                // ปุ่มบันทึกข้อมูลทั้งหมด-----------------------------------
+                ElevatedButton(
+                  onPressed: _submitData, // ฟังก์ชันที่ทำงานเมื่อกดปุ่ม
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors
+                        .orange, // เปลี่ยนสีปุ่มเป็นสีส้มให้เหมือนปุ่ม Finish
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0), // มุมปุ่มโค้งมน
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0), // ระยะห่างแนวตั้งของปุ่ม
+                    minimumSize: const Size(
+                        double.infinity, 50), // กำหนดขนาดปุ่มเท่ากับปุ่ม Finish
+                  ),
+                  child: const Text(
+                    'บันทึกข้อมูล',
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Color.fromARGB(255, 0, 0, 0)), // สไตล์ข้อความในปุ่ม
+                  ),
                 ),
               ],
             ),
           ),
         ),
       ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   // ... (โค้ดสำหรับ bottom navigation bar)
-      // ),
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:myproject/Admin/screens/addSubject_screen.dart';   // นำเข้าหน้าจอ AddSubjectScreen
-import 'package:myproject/Admin/screens/editSubject_screen.dart'; // นำเข้าหน้าจอ EditSubjectScreen
+import 'package:myproject/Admin/screens/subject/addSubject_screen.dart';   // นำเข้าหน้าจอ AddSubjectScreen
+import 'package:myproject/Admin/screens/subject/editSubject_screen.dart'; // นำเข้าหน้าจอ EditSubjectScreen
 //import 'package:myproject/Admin/screens/addSubject_screen.dart';
 class Course {
   final String id; // เพิ่ม id สำหรับการลบ
@@ -38,10 +38,10 @@ class ShowCourseScreen extends StatefulWidget {
 // สร้างคลาสสําหรับรีเฟรชหน้าจอ
 class _ShowCourseScreenState extends State<ShowCourseScreen> {
   Future<List<Course>> fetchCourses() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:5000/showCourse')); 
+    final response = await http.get(Uri.parse('http://10.0.2.2:5000//showCourse')); 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as List<dynamic>;
-      print(data); // พิมพ์ข้อมูลดิบที่ได้รับจาก API
+      //print(data); // พิมพ์ข้อมูลดิบที่ได้รับจาก API
       return data.map((item) => Course.fromJson(item)).toList();
     } else {
       throw Exception('ไม่สามารถโหลดข้อมูลวิชาได้');
@@ -106,9 +106,10 @@ void _navigateToEditScreen(String courseCode) {
               child: SingleChildScrollView(
                 child: Column(
                   children: snapshot.data!.map((course) {
+                    //print('courseCode: ${course.courseCode}, name: ${course.name}'); // ตรวจสอบค่าที่ได้รับ
                     // คำนวณการแสดงข้อมูล branch
                     String branchDisplay = '';
-                    print('branchIT: ${course.branchIT}, branchCS: ${course.branchCS}'); // ตรวจสอบค่าที่ได้รับ
+                   // print('branchIT: ${course.branchIT}, branchCS: ${course.branchCS}'); // ตรวจสอบค่าที่ได้รับ
                     if (course.branchIT == 1 && course.branchCS == 1) {
                       branchDisplay = 'IT,CS';
                     } else if (course.branchIT == 1) {
@@ -118,7 +119,7 @@ void _navigateToEditScreen(String courseCode) {
                     }
 
                     // การพิมพ์ข้อมูลเพื่อทดสอบว่า branchDisplay ถูกคำนวณถูกต้องหรือไม่
-                    print('branchDisplay: $branchDisplay');
+                    //print('branchDisplay: $branchDisplay');
 
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -156,11 +157,14 @@ void _navigateToEditScreen(String courseCode) {
                               children: [
                                 IconButton(
                                   icon: Icon(Icons.edit),
-                                  onPressed: () => _navigateToEditScreen(course.courseCode), // ส่ง courseCode เป็นพารามิเตอร์
+                                  onPressed: () => _navigateToEditScreen(course.id), // ส่ง courseCode เป็นพารามิเตอร์
                                 ),
                                 IconButton(
                                   icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _deleteCourse(course.id), // ส่ง id เป็นพารามิเตอร์
+                              onPressed: (){ 
+                                _deleteCourse("${course.courseCode}");
+                                
+                              },    
               )
 
                               ],
