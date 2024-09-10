@@ -14,8 +14,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'แอปมหาวิทยาลัย',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
+       theme: ThemeData(
+        primarySwatch: Colors.blue,
+        fontFamily: 'TorsilpKanittha', // ชื่อฟอนต์ที่ตั้งค่าไว้ใน pubspec.yaml
       ),
       home: HomeScreen(),
     );

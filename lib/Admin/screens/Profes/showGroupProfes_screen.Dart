@@ -128,12 +128,14 @@ class _GroupListScreenState extends State<GroupListScreen> {
                 ),
               ],
             ),
+        
             child: ListTile(
               contentPadding: EdgeInsets.all(16.0),
               title: Text(
                 group.name,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
+
               trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
               onTap: () {
                 Navigator.push(

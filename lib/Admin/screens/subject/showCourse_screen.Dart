@@ -64,6 +64,7 @@ void _navigateToEditScreen(String courseCode) {
   );
 }
 
+
  Future<void> _deleteCourse(String id) async {
   final response = await http.delete(Uri.parse('http://10.0.2.2:5000/delete_subject/$id'));
 
@@ -82,6 +83,7 @@ void _navigateToEditScreen(String courseCode) {
     return Scaffold(
       appBar: AppBar(
         title: Text('รายการวิชาเรียน'),
+        
         backgroundColor: Colors.orange,
         actions: [
           TextButton.icon(
