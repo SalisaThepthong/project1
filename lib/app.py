@@ -144,7 +144,7 @@ def add_group_and_members():
         return jsonify({'message': str(e)}), 500
 
 
-
+#ดูข้อมูลทั้งหมด
 @app.route('/groups', methods=['GET'])
 def get_groups():
     try:
@@ -171,9 +171,35 @@ def get_groups():
         return jsonify(result)
     except Exception as e:
         return jsonify({'message': str(e)}), 500
+    
+#ลบข้อมูลกลุ่ม
+@app.route('/delete_group/<string:id_Group>', methods=['DELETE'])
+def delete_group(id_Group):
+    try:
+        # ค้นหากลุ่มตาม id_Group
+        group = ContactGroup.query.filter_by(id_Group=id_Group).first()
 
+        if group is None:
+            return jsonify({'message': 'กลุ่มไม่พบ'}), 404
 
+        # ลบสมาชิกทั้งหมดที่เชื่อมโยงกับกลุ่ม
+        members = ContactProfes.query.filter_by(id_Group=id_Group).all()
+        for member in members:
+            db.session.delete(member)
 
+       
+        db.session.flush()
+
+        # ลบกลุ่ม
+        db.session.delete(group)
+        db.session.commit()
+
+        return jsonify({'message': 'ลบกลุ่มและสมาชิกสำเร็จ'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return jsonify({'message': str(e)}), 500
 
 
 

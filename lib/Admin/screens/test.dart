@@ -23,7 +23,7 @@ class FontTestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'ทดสอบฟอนต์ Maitree',
           style: TextStyle(
             fontSize: 24,
@@ -31,7 +31,7 @@ class FontTestScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Center(
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

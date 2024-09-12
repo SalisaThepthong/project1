@@ -45,7 +45,7 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
 
     if (response.statusCode == 201) {//ถ้าคำขอสำเร็จ 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('บันทึกข้อมูลสำเร็จ!')),
+        const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ!')),
       );
       // ล้างข้อมูลในฟอร์ม
       _courseCodeController.clear();
@@ -96,7 +96,7 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'เพิ่มรายวิชา',
           style: TextStyle(color: Colors.white), // สีข้อความใน AppBar
         ),

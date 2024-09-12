@@ -2,57 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myproject/Admin/screens/Profes/createGroup_screen.dart';
-
-class Group {
-  final String id;
-  final String name;
-  final List<Member> members;
-
-  Group({
-    required this.id,
-    required this.name,
-    required this.members,
-  });
-
-  factory Group.fromJson(Map<String, dynamic> json) {
-    return Group(
-      id: json['id'],
-      name: json['name'],
-      members: List<Member>.from(
-        json['members'].map((memberJson) => Member.fromJson(memberJson)),
-      ),
-    );
-  }
-}
-
-class Member {
-  final String id;
-  final String prefix;
-  final String name;
-  final String lastName;
-  final String email;
-  final String facebook;
-
-  Member({
-    required this.id,
-    required this.prefix,
-    required this.name,
-    required this.lastName,
-    required this.email,
-    required this.facebook,
-  });
-
-  factory Member.fromJson(Map<String, dynamic> json) {
-    return Member(
-      id: json['id'],
-      prefix: json['prefix'],
-      name: json['name'],
-      lastName: json['lastName'],
-      email: json['email'],
-      facebook: json['facebook'],
-    );
-  }
-}
+import 'package:myproject/Admin/screens/Profes/group.dart';
 
 class GroupListScreen extends StatefulWidget {
   @override
@@ -88,6 +38,20 @@ class _GroupListScreenState extends State<GroupListScreen> {
       context,
       MaterialPageRoute(builder: (context) => CreateGroupScreen()),
     );
+  }
+
+  void _navigateToGroupDetailScreen(Group group) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GroupDetailScreen(group: group),
+      ),
+    );
+
+    // รีเฟรชกลุ่มเมื่อกลับมาพร้อมผลการลบสำเร็จ
+    if (result == true) {
+      fetchGroups();
+    }
   }
 
   @override
@@ -128,22 +92,15 @@ class _GroupListScreenState extends State<GroupListScreen> {
                 ),
               ],
             ),
-        
             child: ListTile(
               contentPadding: EdgeInsets.all(16.0),
               title: Text(
                 group.name,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-
               trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GroupDetailScreen(group: group),
-                  ),
-                );
+                _navigateToGroupDetailScreen(group);
               },
             ),
           );
@@ -153,10 +110,59 @@ class _GroupListScreenState extends State<GroupListScreen> {
   }
 }
 
-class GroupDetailScreen extends StatelessWidget {
+class GroupDetailScreen extends StatefulWidget {
   final Group group;
 
   const GroupDetailScreen({Key? key, required this.group}) : super(key: key);
+
+  @override
+  _GroupDetailScreenState createState() => _GroupDetailScreenState();
+}
+
+class _GroupDetailScreenState extends State<GroupDetailScreen> {
+  Future<void> _deleteGroup(String groupId) async {
+    try {
+      final response =
+          await http.delete(Uri.parse('http://10.0.2.2:5000/delete_group/$groupId'));
+
+      if (response.statusCode == 200) {
+        Navigator.pop(context, true); // ส่งค่า true กลับไปเพื่อบอกว่าลบสำเร็จ
+      } else {
+        print('ไม่สามารถลบกลุ่มได้: ${response.statusCode}');
+        print('รายละเอียดการตอบกลับ: ${response.body}');
+      }
+    } catch (e) {
+      print('ข้อผิดพลาดในการลบกลุ่ม: $e');
+    }
+  }
+
+  Future<void> _showConfirmDialog(BuildContext context, String id_Group) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('ยืนยันการลบ'),
+          content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่มนี้?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('ยกเลิก'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('ลบ'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteGroup(id_Group);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _showActionMenu(BuildContext context) {
     showModalBottomSheet(
@@ -178,7 +184,7 @@ class GroupDetailScreen extends StatelessWidget {
               title: Text('Delete'),
               onTap: () {
                 Navigator.pop(context);
-                // Add your delete functionality here
+                _showConfirmDialog(context, widget.group.id);
               },
             ),
           ],
@@ -191,13 +197,22 @@ class GroupDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(group.name),
+        title: Text(widget.group.name),
         backgroundColor: Colors.orange,
+        actions: <Widget>[
+          TextButton.icon(
+            icon: Icon(Icons.delete, color: Colors.red),
+            label: Text('ลบกลุ่ม', style: TextStyle(color: Colors.white)),
+            onPressed: () {
+              _showConfirmDialog(context, widget.group.id);
+            },
+          ),
+        ],
       ),
       body: ListView.builder(
-        itemCount: group.members.length,
+        itemCount: widget.group.members.length,
         itemBuilder: (context, index) {
-          final member = group.members[index];
+          final member = widget.group.members[index];
           return Container(
             margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             decoration: BoxDecoration(

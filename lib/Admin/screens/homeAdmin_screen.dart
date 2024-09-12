@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
         title: Text('ยินดีต้อนรับคุณ แอดมิน'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0), // ลดขนาด Padding
+        padding: const EdgeInsets.all(3.0), // ลดขนาด Padding
         child: Transform.scale(
           scale: 0.6, // ปรับขนาดการซูมของ GridView ที่ 80%
           child: GridView.builder(

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:myproject/Admin/screens/subject/addSubject_screen.dart';   // นำเข้าหน้าจอ AddSubjectScreen
 import 'package:myproject/Admin/screens/subject/editSubject_screen.dart'; // นำเข้าหน้าจอ EditSubjectScreen
-//import 'package:myproject/Admin/screens/addSubject_screen.dart';
+
 class Course {
   final String id; // เพิ่ม id สำหรับการลบ
   final String courseCode;
@@ -76,6 +76,35 @@ void _navigateToEditScreen(String courseCode) {
     print('ไม่สามารถลบวิชาได้');
   }
 }
+
+Future<void> _showConfirmDialog(String id) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('ยืนยันการลบ'),
+        content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบวิชานี้?'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('ยกเลิก'),
+            onPressed: () {
+              Navigator.of(context).pop(); // ปิดป๊อปอัพ
+            },
+          ),
+          TextButton(
+            child: Text('ลบ'),
+            onPressed: () {
+              Navigator.of(context).pop(); // ปิดป๊อปอัพ
+              _deleteCourse(id); // เรียกใช้ฟังก์ชันลบ
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
 
   @override
@@ -164,7 +193,7 @@ void _navigateToEditScreen(String courseCode) {
                                 IconButton(
                                   icon: Icon(Icons.delete, color: Colors.red),
                               onPressed: (){ 
-                                _deleteCourse("${course.courseCode}");
+                                _showConfirmDialog("${course.courseCode}");
                                 
                               },    
               )
