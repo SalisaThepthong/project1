@@ -65,6 +65,7 @@ void _navigateToEditScreen(String courseCode) {
 }
 
 
+
  Future<void> _deleteCourse(String id) async {
   final response = await http.delete(Uri.parse('http://10.0.2.2:5000/delete_subject/$id'));
 
@@ -180,10 +181,20 @@ Future<void> _showConfirmDialog(String id) async {
                                     style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   Text(course.name),
-                                  Text(branchDisplay), // แสดงข้อมูล branch
+                                  
+                                 // Text(branchDisplay), // แสดงข้อมูล branch
+                                 Text(branchDisplay,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green, // สีเขียว
+                                    ),
+                                  ),
+                                                    
+                                  
                                 ],
                               ),
                             ),
+                            
                             Row(
                               children: [
                                 IconButton(

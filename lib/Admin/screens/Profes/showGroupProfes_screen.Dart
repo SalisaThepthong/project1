@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myproject/Admin/screens/Profes/createGroup_screen.dart';
 import 'package:myproject/Admin/screens/Profes/group.dart';
+import 'package:myproject/Admin/screens/Profes/group_detail_screen.dart';
+import 'package:myproject/Admin/screens/Profes/editGroup_screen.dart';
+//import 'group_detail_screen.dart'; // import ไฟล์ที่แยกไว้
 
 class GroupListScreen extends StatefulWidget {
   @override
@@ -39,7 +42,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
       MaterialPageRoute(builder: (context) => CreateGroupScreen()),
     );
   }
-
+// ไปหน้าจอ GroupDetailScreen
   void _navigateToGroupDetailScreen(Group group) async {
     final result = await Navigator.push(
       context,
@@ -47,6 +50,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
         builder: (context) => GroupDetailScreen(group: group),
       ),
     );
+  
 
     // รีเฟรชกลุ่มเมื่อกลับมาพร้อมผลการลบสำเร็จ
     if (result == true) {
@@ -92,16 +96,46 @@ class _GroupListScreenState extends State<GroupListScreen> {
                 ),
               ],
             ),
-            child: ListTile(
+     child: ListTile(
               contentPadding: EdgeInsets.all(16.0),
-              title: Text(
-                group.name,
-                style: TextStyle(fontWeight: FontWeight.bold),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                      Icons.group, // ใช้ไอคอนที่คุณต้องการ
+                      color: Colors.brown, // สีของไอคอน
+                      size: 24.0, // ขนาดของไอคอน
+                    ),
+                    SizedBox(width: 10),
+                  Text(
+                     "กลุ่ม${group.name}",
+                    //group.name,
+                    style: TextStyle(
+                      color: Colors.brown,
+                      //fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                    
+                    ),
+                  ),
+                  // SizedBox(width: 10),
+                  // Text(
+                  //   "กลุ่ม 0${group.members.length.toString()}",
+                  //  //group.members.length.toString(),
+                  //   style: TextStyle(
+                  //    // fontWeight: FontWeight.bold,
+                  //     fontSize: 20.0,
+                  //   ),
+                  // ),
+                ],
               ),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
+              // trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
               onTap: () {
                 _navigateToGroupDetailScreen(group);
               },
+              trailing: IconButton(
+                icon: Icon(Icons.more_vert),
+                onPressed: () =>  _showActionMenu(context, group.id),
+              ),
             ),
           );
         },
@@ -110,61 +144,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
   }
 }
 
-class GroupDetailScreen extends StatefulWidget {
-  final Group group;
-
-  const GroupDetailScreen({Key? key, required this.group}) : super(key: key);
-
-  @override
-  _GroupDetailScreenState createState() => _GroupDetailScreenState();
-}
-
-class _GroupDetailScreenState extends State<GroupDetailScreen> {
-  Future<void> _deleteGroup(String groupId) async {
-    try {
-      final response =
-          await http.delete(Uri.parse('http://10.0.2.2:5000/delete_group/$groupId'));
-
-      if (response.statusCode == 200) {
-        Navigator.pop(context, true); // ส่งค่า true กลับไปเพื่อบอกว่าลบสำเร็จ
-      } else {
-        print('ไม่สามารถลบกลุ่มได้: ${response.statusCode}');
-        print('รายละเอียดการตอบกลับ: ${response.body}');
-      }
-    } catch (e) {
-      print('ข้อผิดพลาดในการลบกลุ่ม: $e');
-    }
-  }
-
-  Future<void> _showConfirmDialog(BuildContext context, String id_Group) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('ยืนยันการลบ'),
-          content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่มนี้?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('ยกเลิก'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('ลบ'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _deleteGroup(id_Group);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showActionMenu(BuildContext context) {
+void _showActionMenu(BuildContext context, String groupId) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -173,18 +153,20 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
           children: [
             ListTile(
               leading: Icon(Icons.edit, color: Colors.blue),
-              title: Text('Edit'),
+              title: Text('แก้ไขกลุ่ม'),
               onTap: () {
                 Navigator.pop(context);
+                _navigateToEditScreen(context,groupId);
                 // Add your navigation to the edit screen here
+              //EditGroupScreen(context, groupId);
               },
             ),
             ListTile(
               leading: Icon(Icons.delete, color: Colors.red),
-              title: Text('Delete'),
+              title: Text('ลบกลุ่ม'),
               onTap: () {
                 Navigator.pop(context);
-                _showConfirmDialog(context, widget.group.id);
+                _showConfirmDialog(context, groupId);
               },
             ),
           ],
@@ -192,89 +174,56 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
       },
     );
   }
+  void _navigateToEditScreen(BuildContext context, String groupId) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => EditGroupScreen(groupId: groupId), // แก้เป็นการส่งค่า courseCode ให้ตรงกับที่ต้องการ
+    ),
+  );
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.group.name),
-        backgroundColor: Colors.orange,
+  
+    Future<void> _deleteGroup(BuildContext context, String groupId) async {
+  try {
+    final response =
+        await http.delete(Uri.parse('http://10.0.2.2:5000/delete_group/$groupId'));
+
+    if (response.statusCode == 200) {
+      Navigator.pop(context, true); // ใช้ context ที่ถูกส่งมาจากฟังก์ชัน
+    } else {
+      print('ไม่สามารถลบกลุ่มได้: ${response.statusCode}');
+      print('รายละเอียดการตอบกลับ: ${response.body}');
+    }
+  } catch (e) {
+    print('ข้อผิดพลาดในการลบกลุ่ม: $e');
+  }
+}
+
+    Future<void> _showConfirmDialog(BuildContext context, String groupId) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('ยืนยันการลบ'),
+        content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่มนี้?'),
         actions: <Widget>[
-          TextButton.icon(
-            icon: Icon(Icons.delete, color: Colors.red),
-            label: Text('ลบกลุ่ม', style: TextStyle(color: Colors.white)),
+          TextButton(
+            child: Text('ยกเลิก'),
             onPressed: () {
-              _showConfirmDialog(context, widget.group.id);
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('ลบ'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deleteGroup(context, groupId); // ส่ง context ไปยังฟังก์ชัน
             },
           ),
         ],
-      ),
-      body: ListView.builder(
-        itemCount: widget.group.members.length,
-        itemBuilder: (context, index) {
-          final member = widget.group.members[index];
-          return Container(
-            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(12.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: ListTile(
-              contentPadding: EdgeInsets.all(16.0),
-              title: Text(
-                '${member.prefix}${member.name} ${member.lastName}',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.email, color: Colors.red),
-                      SizedBox(width: 8.0),
-                      Expanded(
-                        child: Text(
-                          member.email,
-                          style: TextStyle(color: Colors.black),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8.0),
-                  if (member.facebook.isNotEmpty) ...[
-                    Row(
-                      children: [
-                        Icon(Icons.facebook, color: Colors.blue),
-                        SizedBox(width: 8.0),
-                        Expanded(
-                          child: Text(
-                            member.facebook,
-                            style: TextStyle(color: Colors.blue),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-              trailing: IconButton(
-                icon: Icon(Icons.more_vert),
-                onPressed: () => _showActionMenu(context),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+      );
+    },
+  );
 }

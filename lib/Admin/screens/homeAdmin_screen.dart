@@ -39,6 +39,7 @@ class HomeScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(3.0), // ลดขนาด Padding
         child: Transform.scale(
+          
           scale: 0.6, // ปรับขนาดการซูมของ GridView ที่ 80%
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

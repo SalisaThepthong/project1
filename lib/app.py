@@ -201,6 +201,124 @@ def delete_group(id_Group):
         print(e)
         return jsonify({'message': str(e)}), 500
 
+# ลบสมาชิก
+@app.route('/delete_member/<string:id_Member>', methods=['DELETE'])
+def delete_member(id_Member):
+    try:
+        # ค้นหาสมาชิกตาม id_Profes
+        member = ContactProfes.query.filter_by(id_Member=id_Member).first()
+
+        if member is None:
+            return jsonify({'message': 'ไม่พบสมาชิก'}), 404
+
+        # ลบสมาชิก
+        db.session.delete(member)
+        db.session.commit()
+
+        return jsonify({'message': 'ลบสมาชิกสำเร็จ'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return jsonify({'message': str(e)}), 500
+    #แก้ไขข้อมูล
+# @app.route('/update_group_and_members', methods=['PUT'])
+# def update_group_and_members():
+#     data = request.json
+#     group_id = data.get('id_group')
+#     group_number = data.get('group_number')
+#     group_name = data.get('group_name')
+    
+#     # ตรวจสอบว่ากลุ่มมีอยู่หรือไม่
+#     group = ContactGroup.query.filter_by(id_Group=group_id).first()
+#     if not group:
+#         return jsonify({'message': 'Group not found'}), 404
+
+#     # อัพเดตข้อมูลกลุ่ม
+#     group.group_Number = group_number
+#     group.group_Name = group_name
+
+#     # อัพเดตสมาชิก
+#     members = data.get('members', [])
+#     for member in members:
+#         existing_member = ContactProfes.query.filter_by(id_Member=member.get('id_member')).first()
+#         if existing_member:
+#             existing_member.member_Prefix = member.get('member_prefix')
+#             existing_member.member_Name = member.get('member_name')
+#             existing_member.member_Lname = member.get('member_lname')
+#             existing_member.member_Email = member.get('member_email')
+#             existing_member.member_Facebook = member.get('member_facebook')
+#         else:
+#             new_member = ContactProfes(
+#                 id_Member=generate_member_id(),
+#                 member_Prefix=member.get('member_prefix'),
+#                 member_Name=member.get('member_name'),
+#                 member_Lname=member.get('member_lname'),
+#                 member_Email=member.get('member_email'),
+#                 member_Facebook=member.get('member_facebook'),
+#                 id_Group=group_id
+#             )
+#             db.session.add(new_member)
+
+#     try:
+#         db.session.commit()
+#         return jsonify({'message': 'Group and members updated successfully'}), 200
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({'message': str(e)}), 500
+    # API สำหรับแก้ไขข้อมูลกลุ่ม
+@app.route('/update_group/<id_group>', methods=['PUT'])
+def update_group(id_group):
+    data = request.json
+    group = ContactGroup.query.filter_by(id_Group=id_group).first()
+    
+    if not group:
+        return jsonify({'message': 'Group not found'}), 404
+
+    group.group_Number = data.get('group_Number', group.group_Number)
+    group.group_Name = data.get('group_Name', group.group_Name)
+
+    db.session.commit()
+    return jsonify({'message': 'Group updated successfully'}), 200
+
+# API สำหรับแก้ไขข้อมูลสมาชิก
+@app.route('/update_member/<id_member>', methods=['PUT'])
+def update_member(id_member):
+    data = request.json
+    member = ContactProfes.query.filter_by(id_Member=id_member).first()
+    
+    if not member:
+        return jsonify({'message': 'Member not found'}), 404
+
+    member.member_Prefix = data.get('member_Prefix', member.member_Prefix)
+    member.member_Name = data.get('member_Name', member.member_Name)
+    member.member_Lname = data.get('member_Lname', member.member_Lname)
+    member.member_Email = data.get('member_Email', member.member_Email)
+    member.member_Facebook = data.get('member_Facebook', member.member_Facebook)
+    member.id_Group = data.get('id_Group', member.id_Group)
+
+    db.session.commit()
+    return jsonify({'message': 'Member updated successfully'}), 200
+#get เรียกกลุ่มมาshow ในหน้า edit
+@app.route('/get_group/<string:group_id>', methods=['GET'])
+def get_group(group_id):
+    try:
+        # ดึงข้อมูลกลุ่มตาม id_Group
+        group = ContactGroup.query.filter_by(id_Group=group_id).first()
+        if not group:
+            return jsonify({'message': 'Group not found'}), 404
+
+        # ส่งข้อมูลในรูปแบบ JSON
+        group_data = {
+            'group_Number': group.group_Number,
+            'group_Name': group.group_Name
+        }
+        return jsonify(group_data), 200
+
+    except Exception as e:
+        print(f"Error fetching group: {str(e)}")
+        return jsonify({'message': 'An error occurred while fetching group data'}), 500
+
 
 
 if __name__ == '__main__':
