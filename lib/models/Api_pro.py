@@ -2,9 +2,10 @@
 from flask import Blueprint, request, jsonify
 from model import db, ContactGroup, ContactProfes
 
-
 Profes_blueprint = Blueprint('Profes', __name__)
 
+
+#เพิ่ม กลุ่ม และ สมาชิก
 def generate_group_id():
     count = ContactGroup.query.count()
     new_id = 'G' + str(count + 1).zfill(3)
@@ -48,7 +49,8 @@ def add_group_and_members():
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': str(e)}), 500
-
+    
+# แสดงกลุ่ม และ สมาชิก
 @Profes_blueprint.route('/groups', methods=['GET'])
 def get_groups():
     try:
@@ -75,7 +77,7 @@ def get_groups():
         return jsonify(result)
     except Exception as e:
         return jsonify({'message': str(e)}), 500
-
+# ลบกลุ่ม และ สมาชิก----------------------------------------------
 @Profes_blueprint.route('/delete_group/<string:id_Group>', methods=['DELETE'])
 def delete_group(id_Group):
     try:
@@ -88,7 +90,7 @@ def delete_group(id_Group):
         for member in members:
             db.session.delete(member)
 
-        db.session.flush()
+        db.session.flush() #ไว้เคลียค่าในตาราง ให้สามารถลบได้
 
         db.session.delete(group)
         db.session.commit()
@@ -99,6 +101,9 @@ def delete_group(id_Group):
         db.session.rollback()
         return jsonify({'message': str(e)}), 500
 
+
+
+#     ลบ สมาชิก
 @Profes_blueprint.route('/delete_member/<string:id_Member>', methods=['DELETE'])
 def delete_member(id_Member):
     try:
@@ -115,7 +120,8 @@ def delete_member(id_Member):
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': str(e)}), 500
-
+    
+#    แก้ไข กลุ่ม และ สมาชิก 
 @Profes_blueprint.route('/update_group/<id_group>', methods=['PUT'])
 def update_group(id_group):
     data = request.json
@@ -147,7 +153,7 @@ def update_member(id_member):
 
     db.session.commit()
     return jsonify({'message': 'Member updated successfully'}), 200
-
+#    แสดง กลุ่ม และ สมาชิก ในช่องฟอร์ม  แต่ยังไม่ได้ เรียกสมาชิก
 @Profes_blueprint.route('/get_group/<string:group_id>', methods=['GET'])
 def get_group(group_id):
     try:

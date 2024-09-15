@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from model import db, Subject
 
 subject_blueprint = Blueprint('subject', __name__)
-
+# เพิ่มรายวิชา
 @subject_blueprint.route('/add_subject', methods=['POST'])
 def add_subject():
     data = request.json
@@ -19,6 +19,7 @@ def add_subject():
     db.session.commit()
     return jsonify({'message': 'Subject added successfully'}), 201
 
+# แสดงรายวิชา
 @subject_blueprint.route('/showCourse', methods=['GET'])
 def show_courses():
     try:
@@ -49,7 +50,8 @@ def show_courses():
     except Exception as e:
         print(f"Error occurred: {e}")
         return jsonify({'message': 'Internal server error'}), 500
-
+    
+#แก้ไขรายวิชา
 @subject_blueprint.route('/update_subject/<string:subject_id>', methods=['PUT'])
 def update_subject(subject_id):
     data = request.json
@@ -63,7 +65,8 @@ def update_subject(subject_id):
         return jsonify({'message': 'Subject updated successfully'})
     else:
         return jsonify({'error': 'Subject not found'}), 404
-
+    
+#ลบรายวิชา
 @subject_blueprint.route('/delete_subject/<string:id>', methods=['DELETE'])
 def delete_subject(id):
     subject = Subject.query.filter_by(courseCode=id).first()
