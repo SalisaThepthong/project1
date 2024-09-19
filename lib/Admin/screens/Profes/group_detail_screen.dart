@@ -32,7 +32,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
 ///delete_member/<id_Profes>
   Future<void> _deleteMember(String id_Member) async {
     try {
-      final response = await http.delete(Uri.parse('http://10.0.2.2:5000/delete_member/$id_Member'));
+      final response = await http.delete(Uri.parse('http://10.0.2.2:5000/Profes/delete_member/$id_Member'));
 
       if (response.statusCode == 200) {
         setState(() {

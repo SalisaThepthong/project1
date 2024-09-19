@@ -2,7 +2,7 @@
 import 'dart:convert'; // ใช้สำหรับแปลงข้อมูลเป็น JSON
 import 'package:flutter/material.dart'; // ใช้สำหรับสร้าง UI
 import 'package:http/http.dart' as http;
-
+import 'package:myproject/Admin/validator.dart';
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
   @override
@@ -54,7 +54,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       final groupName = _groupName;
 
       final uri = Uri.parse(
-          'http://10.0.2.2:5000/add_group_and_members'); // URL ของ API
+          'http://10.0.2.2:5000/Profes/add_group_and_members'); // URL ของ API
 
       // เตรียมข้อมูลเป็น JSON
       final body = jsonEncode({
@@ -185,21 +185,17 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     ],
                   ),
                   child: TextFormField(
-                    decoration: const InputDecoration(
-                      // ลบเส้นขอบภายใน
-                      border: InputBorder.none,
-                      labelText: 'ชื่อกลุ่ม',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'กรุณากรอกชื่อกลุ่ม'; // ตรวจสอบว่ากรอกชื่อกลุ่มหรือไม่
-                      }
-                      return null;
-                    },
-                    onChanged: (value) {
-                      _groupName = value; // เก็บข้อมูลชื่อกลุ่ม
-                    },
-                  ),
+                          decoration: const InputDecoration(
+                            // ลบเส้นขอบภายใน
+                            border: InputBorder.none,
+                            labelText: 'ชื่อกลุ่ม',
+                          ),
+                          validator: validateName,
+                          onChanged: (value) {
+                            _groupName = value; // เก็บข้อมูลชื่อกลุ่ม
+                          },
+                        ),
+
                 ),
 
                 const SizedBox(height: 16),
@@ -223,21 +219,18 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     ],
                   ),
                   child: TextFormField(
-                    decoration: const InputDecoration(
-                      // ลบเส้นขอบภายใน
-                      border: InputBorder.none,
-                      labelText: 'เลขกลุ่ม',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'กรุณากรอกเลขกลุ่ม'; // ตรวจสอบว่ากรอกเลขกลุ่มหรือไม่
-                      }
-                      return null;
-                    },
-                    onChanged: (value) {
-                      _groupNumber = value; // เก็บข้อมูลเลขกลุ่ม
-                    },
-                  ),
+                          decoration: const InputDecoration(
+                            // ลบเส้นขอบภายใน
+                            border: InputBorder.none,
+                            labelText: 'เลขกลุ่ม',
+                          ),
+                          keyboardType: TextInputType.number, // ตั้งค่าให้คีย์บอร์ดเป็นแบบตัวเลข
+                          validator: validateCourseCode ,
+                          onChanged: (value) {
+                            _groupNumber = value; // เก็บข้อมูลเลขกลุ่ม
+                          },
+                        ),
+
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -252,53 +245,53 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 const SizedBox(height: 5),
                 // รายการสมาชิกของกลุ่ม
                 ListView.builder(
-  shrinkWrap: true,
-  physics: const NeverScrollableScrollPhysics(),
-  itemCount: _members.length,
-  itemBuilder: (context, index) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: Colors.grey[300]!, width: 1.0), // ใช้สีโปร่งใสแทนborder: InputBorder.//.all(color: Colors.transparent), // ไม่มีเส้นขอบ
-          boxShadow: [
-            BoxShadow(
-              color: const Color.fromARGB(255, 242, 240, 237).withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ช่องเลือกคำนำหน้าชื่อของสมาชิก
-            Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 255, 255, 255), // สีพื้นหลังของกล่อง
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(color: const Color.fromARGB(255, 198, 192, 192)!), // เส้นขอบสีส้มอ่อน
-              ),
-              child: DropdownButtonFormField<String>(
-                value: _members[index][' prefix'],
-                items: _prefixOptions.map((prefix) {
-                  return DropdownMenuItem<String>(
-                    value: prefix,
-                    child: Text(prefix),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _members[index]['prefix'] = value; // กำหนดคำนำหน้าชื่อสมาชิก
-                  });
-                },
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  labelText: ' คำนำหน้าชื่อ',
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _members.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: Colors.grey[300]!, width: 1.0), // ใช้สีโปร่งใสแทนborder: InputBorder.//.all(color: Colors.transparent), // ไม่มีเส้นขอบ
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color.fromARGB(255, 242, 240, 237).withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ช่องเลือกคำนำหน้าชื่อของสมาชิก
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 255, 255, 255), // สีพื้นหลังของกล่อง
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: const Color.fromARGB(255, 198, 192, 192)!), // เส้นขอบสีส้มอ่อน
+                      ),
+                      child: DropdownButtonFormField<String>(
+                        value: _members[index][' prefix'],
+                        items: _prefixOptions.map((prefix) {
+                          return DropdownMenuItem<String>(
+                            value: prefix,
+                            child: Text(prefix),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _members[index]['prefix'] = value; // กำหนดคำนำหน้าชื่อสมาชิก
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          labelText: ' คำนำหน้าชื่อ',
                 ),
               ),
             ),
@@ -315,6 +308,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   border: InputBorder.none,
                   labelText: ' ชื่อ',
                 ),
+                 validator: validateName, // เรียกใช้เมธอด validateName 
                 onChanged: (value) {
                   _members[index]['name'] = value; // เก็บข้อมูลชื่อสมาชิก
                 },
@@ -333,6 +327,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   border: InputBorder.none,
                   labelText: ' นามสกุล',
                 ),
+                 validator: validateName, // เรียกใช้เมธอด validateName
                 onChanged: (value) {
                   _members[index]['lname'] = value; // เก็บข้อมูลนามสกุลสมาชิก
                 },
@@ -352,6 +347,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   labelText: ' อีเมล',
                 ),
                 keyboardType: TextInputType.emailAddress,
+                validator: validateEmail,
                 onChanged: (value) {
                   _members[index]['email'] = value; // เก็บข้อมูลอีเมลสมาชิก
                 },

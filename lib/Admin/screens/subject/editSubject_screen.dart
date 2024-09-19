@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:myproject/Admin/validator.dart';
 
 class EditSubjectScreen extends StatefulWidget {
   final String subjectId;
@@ -19,23 +20,36 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
   String _selectedBranch = 'IT'; // Default branch
   List<String> branches = ['IT', 'CS', 'IT & CS']; // Branch list
 
-  // Configure IP address for emulator and real devices
-  final String emulatorIp = 'http://10.0.2.2:5000'; // IP for emulator
-  final String physicalIp = 'http://127.0.0.1:5000'; // IP for real device
-
-  // Set this according to your environment
-  bool isEmulator = true; // Change to false if using a real device
-
   @override
   void initState() {
     super.initState();
-    //_fetchSubjectDetails();
+    _fetchSubjectDetails(); // Fetch subject details on initialization
+  }
+
+  Future<void> _fetchSubjectDetails() async {
+    final Uri url = Uri.parse("http://10.0.2.2:5000/subject/updatesubject/${widget.subjectId}");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        _courseCodeController.text = data['courseCode'] ?? '';
+        _nameController.text = data['name_Subjects'] ?? '';
+        _selectedBranch = data['branchIT'] == 1
+            ? 'IT'
+            : (data['branchCS'] == 1
+                ? 'CS'
+                : 'IT & CS');
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch subject details: ${response.reasonPhrase}')),
+      );
+    }
   }
 
   Future<void> _updateSubject() async {
-    final String baseUrl = isEmulator ? emulatorIp : physicalIp;
-    final Uri url = Uri.parse("$baseUrl/update_subject/${widget.subjectId}");
-    print(baseUrl);
+    final Uri url = Uri.parse("http://10.0.2.2:5000/subject/updatesubject/${widget.subjectId}");
     final response = await http.put(
       url,
       headers: <String, String>{
@@ -118,12 +132,7 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
                   filled: true,
                   fillColor: Colors.grey[200], // Background color of input field
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter course code';
-                  }
-                  return null;
-                },
+                validator : validateCourseCode,
               ),
               SizedBox(height: 10),
               TextFormField(
@@ -138,12 +147,7 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
                   filled: true,
                   fillColor: Colors.grey[200], // Background color of input field
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter subject name';
-                  }
-                  return null;
-                },
+                validator: validateName,
               ),
               SizedBox(height: 10),
               DropdownButtonFormField<String>(

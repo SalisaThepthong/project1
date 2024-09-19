@@ -1,32 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:myproject/Admin/validator.dart';
 
 class AddSubjectScreen extends StatefulWidget {
-  //เป็นคลาสหลักของหน้าจอ
   @override
-  _AddSubjectScreenState createState() =>
-      _AddSubjectScreenState(); //เป็น State ของมัน
-  //_AddSubjectScreenState: รับผิดชอบการจัดการ UI และฟังก์ชันการทำงานของหน้าจอ
+  _AddSubjectScreenState createState() => _AddSubjectScreenState();
 }
 
 class _AddSubjectScreenState extends State<AddSubjectScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController _courseCodeController =
-      TextEditingController(); //ตัวควบคุมข้อความ (TextEditingController) สำหรับเก็บค่ารหัสวิชาและชื่อวิชา
+  final TextEditingController _courseCodeController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  String _selectedBranch = 'IT'; // ค่าเริ่มต้นของสาขา
-  List<String> branches = [
-    'IT',
-    'CS',
-    'IT & CS'
-  ]; // รายการตัวเลือกสาขาที่สามารถเลือกได้
-  final String emulatorIp = 'http://10.0.2.2:5000'; // IP สำหรับ emulator
+  String _selectedBranch = 'IT';
+  List<String> branches = ['IT', 'CS', 'IT & CS'];
+   // URL รวมสำหรับ API
+  //static const String baseUrl = 'http://10.0.2.2:5000/subject';
 
-//ฟังชั่นสำหรับบันทึกข้อมูล-----------------------------------------------------------
   Future<void> saveSubject() async {
-    final Uri url = Uri.parse("$emulatorIp/add_subject");
+    final Uri url = Uri.parse("http://10.0.2.2:5000/subject/add_subject");
 
     final response = await http.post(
       url,
@@ -36,24 +28,20 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       body: jsonEncode(<String, dynamic>{
         'courseCode': _courseCodeController.text,
         'name_Subjects': _nameController.text,
-        'branchIT':
-            _selectedBranch == 'IT' || _selectedBranch == 'IT & CS' ? 1 : 0,
-        'branchCS':
-            _selectedBranch == 'CS' || _selectedBranch == 'IT & CS' ? 1 : 0,
+        'branchIT': _selectedBranch == 'IT' || _selectedBranch == 'IT & CS' ? 1 : 0,
+        'branchCS': _selectedBranch == 'CS' || _selectedBranch == 'IT & CS' ? 1 : 0,
       }),
     );
 
-    if (response.statusCode == 201) {//ถ้าคำขอสำเร็จ 
+    if (response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ!')),
       );
-      // ล้างข้อมูลในฟอร์ม
       _courseCodeController.clear();
       _nameController.clear();
       setState(() {
-        _selectedBranch = branches[0]; // รีเซ็ตค่า Dropdown เป็นค่าเริ่มต้น
+        _selectedBranch = branches[0];
       });
-
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึกข้อมูล')),
@@ -61,7 +49,6 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
     }
   }
 
-  //ฟังชั่นสำหรับแสดง Dialog ยืนยันการเพิ่มข้อมูล-------------------------------
   Future<void> showSuccessDialog() async {
     showDialog(
       context: context,
@@ -73,14 +60,14 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
             TextButton(
               child: Text('ยกเลิก'),
               onPressed: () {
-                Navigator.of(context).pop(); // ปิด Dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: Text('ยืนยัน'),
               onPressed: () {
-                Navigator.of(context).pop(); // ปิด Dialog
-                saveSubject(); // เรียกฟังก์ชันที่ส่งข้อมูลไปยัง API
+                Navigator.of(context).pop();
+                saveSubject();
               },
             ),
           ],
@@ -88,75 +75,55 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       },
     );
   }
-//------------------------------------------------------------------------
 
-
-//เมธอด build:สร้าง UI ของหน้าจอ โดยใช้ Scaffold และ AppBar
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'เพิ่มรายวิชา',
-          style: TextStyle(color: Colors.white), // สีข้อความใน AppBar
+          style: TextStyle(color: Colors.white),
         ),
-        centerTitle: true, // ทำให้ข้อความอยู่ตรงกลาง
-        backgroundColor: Colors.teal, // สีพื้นหลังของ AppBar
+        centerTitle: true,
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Form(//มีฟิลด์สำหรับใส่รหัสวิชา, ชื่อวิชา และเลือกสาขา 
+        child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-      //-------------------------------------------------------
               TextFormField(
                 controller: _courseCodeController,
                 decoration: InputDecoration(
                   labelText: 'รหัสวิชา',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0), // ขอบมนของกรอบ
-                    borderSide: BorderSide.none, // ไม่ต้องการเส้นขอบ
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide.none,
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                   filled: true,
-                  fillColor: Colors.grey[200], // สีพื้นหลังของช่องกรอกข้อมูล
+                  fillColor: Colors.grey[200],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'กรุณาใส่รหัสวิชา';
-                  }
-                  return null;
-                },
+                validator: validateCourseCode,
               ),
-
               SizedBox(height: 10),
-
-//---------------------------------------------------------------------
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'ชื่อวิชา',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0), // ขอบมนของกรอบ
-                    borderSide: BorderSide.none, // ไม่ต้องการเส้นขอบ
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide.none,
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                   filled: true,
-                  fillColor: Colors.grey[200], // สีพื้นหลังของช่องกรอกข้อมูล
+                  fillColor: Colors.grey[200],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'กรุณาใส่ชื่อวิชา';
-                  }
-                  return null;
-                },
+                validator: validateName,
               ),
               SizedBox(height: 10),
-//-----------------------------------------------------------------------
               DropdownButtonFormField<String>(
                 value: _selectedBranch,
                 items: branches.map((String branch) {
@@ -173,22 +140,19 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
                 decoration: InputDecoration(
                   labelText: 'สาขา',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0), // ขอบมนของกรอบ
-                    borderSide: BorderSide.none, // ไม่ต้องการเส้นขอบ
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide.none,
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                   filled: true,
-                  fillColor: Colors.grey[200], // สีพื้นหลังของช่องกรอกข้อมูล
+                  fillColor: Colors.grey[200],
                 ),
               ),
               SizedBox(height: 20),
-              
-  //-ปุ่ม Finish ---------------------------------------------------------
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    showSuccessDialog(); // แสดง Dialog สำหรับยืนยันการบันทึก
+                    showSuccessDialog();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('กรุณาตรวจสอบข้อมูลอีกครั้ง')),
@@ -196,8 +160,8 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // สีของปุ่ม
-                  minimumSize: Size(double.infinity, 50), // ความยาวของปุ่ม
+                  backgroundColor: Colors.orange,
+                  minimumSize: Size(double.infinity, 50),
                 ),
                 child: Text('Finish'),
               ),

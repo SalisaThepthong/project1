@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:myproject/Admin/screens/subject/addSubject_screen.dart';   // นำเข้าหน้าจอ AddSubjectScreen
-import 'package:myproject/Admin/screens/subject/editSubject_screen.dart'; // นำเข้าหน้าจอ EditSubjectScreen
+import 'package:myproject/Admin/screens/subject/addSubject_screen.dart';
+import 'package:myproject/Admin/screens/subject/editSubject_screen.dart';
 
 class Course {
-  final String id; // เพิ่ม id สำหรับการลบ
+  final String id;
   final String courseCode;
   final String name;
   final int branchIT;
   final int branchCS;
 
   Course({
-    required this.id, // กำหนดค่า id
+    required this.id,
     required this.courseCode,
     required this.name,
     required this.branchIT,
@@ -21,7 +21,7 @@ class Course {
 
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
-      id: json['id_Subjects'] ?? '', // ดึงค่า id_Subjects
+      id: json['id_Subjects'] ?? '',
       courseCode: json['courseCode'],
       name: json['name_Subjects'],
       branchIT: json['branchIT'] ?? 0,
@@ -30,22 +30,47 @@ class Course {
   }
 }
 
-// สร้างคลาสสําหรับหน้าจอ
 class ShowCourseScreen extends StatefulWidget {
   @override
   _ShowCourseScreenState createState() => _ShowCourseScreenState();
 }
-// สร้างคลาสสําหรับรีเฟรชหน้าจอ
+
 class _ShowCourseScreenState extends State<ShowCourseScreen> {
+  late Future<List<Course>> _futureCourses;
+  List<Course> _allCourses = [];
+  List<Course> _filteredCourses = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _futureCourses = fetchCourses(); // Initialize in initState
+    _searchController.addListener(_filterCourses);
+  }
+
   Future<List<Course>> fetchCourses() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:5000//showCourse')); 
+    final response = await http.get(Uri.parse('http://10.0.2.2:5000/subject/showCourse'));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as List<dynamic>;
-      //print(data); // พิมพ์ข้อมูลดิบที่ได้รับจาก API
-      return data.map((item) => Course.fromJson(item)).toList();
+      List<Course> courses = data.map((item) => Course.fromJson(item)).toList();
+      setState(() {
+        _allCourses = courses;
+        _filteredCourses = courses; // Initialize filtered courses
+      });
+      return courses;
     } else {
       throw Exception('ไม่สามารถโหลดข้อมูลวิชาได้');
     }
+  }
+
+  void _filterCourses() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredCourses = _allCourses.where((course) {
+        return course.courseCode.toLowerCase().contains(query) ||
+               course.name.toLowerCase().contains(query);
+      }).toList();
+    });
   }
 
   void _navigateToAddScreen() {
@@ -55,65 +80,60 @@ class _ShowCourseScreenState extends State<ShowCourseScreen> {
     );
   }
 
-void _navigateToEditScreen(String courseCode) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => EditSubjectScreen(subjectId: courseCode), // แก้เป็นการส่งค่า courseCode ให้ตรงกับที่ต้องการ
-    ),
-  );
-}
-
-
-
- Future<void> _deleteCourse(String id) async {
-  final response = await http.delete(Uri.parse('http://10.0.2.2:5000/delete_subject/$id'));
-
-  if (response.statusCode == 200) {
-    setState(() {
-      fetchCourses(); // รีเฟรชหน้าจอหลังจากลบ
-    });
-  } else {
-    print('ไม่สามารถลบวิชาได้');
+  void _navigateToEditScreen(String courseId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditSubjectScreen(subjectId: courseId),
+      ),
+    );
   }
-}
 
-Future<void> _showConfirmDialog(String id) async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('ยืนยันการลบ'),
-        content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบวิชานี้?'),
-        actions: <Widget>[
-          TextButton(
-            child: Text('ยกเลิก'),
-            onPressed: () {
-              Navigator.of(context).pop(); // ปิดป๊อปอัพ
-            },
-          ),
-          TextButton(
-            child: Text('ลบ'),
-            onPressed: () {
-              Navigator.of(context).pop(); // ปิดป๊อปอัพ
-              _deleteCourse(id); // เรียกใช้ฟังก์ชันลบ
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+  Future<void> _deleteCourse(String id) async {
+    final response = await http.delete(Uri.parse('http://10.0.2.2:5000/subject/delete_subject/$id'));
 
+    if (response.statusCode == 200) {
+      setState(() {
+        _futureCourses = fetchCourses(); // Refresh courses
+      });
+    } else {
+      print('ไม่สามารถลบวิชาได้');
+    }
+  }
 
+  Future<void> _showConfirmDialog(String id) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('ยืนยันการลบ'),
+          content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบวิชานี้?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('ยกเลิก'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('ลบ'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteCourse(id);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('รายการวิชาเรียน'),
-        
         backgroundColor: Colors.orange,
         actions: [
           TextButton.icon(
@@ -122,9 +142,27 @@ Future<void> _showConfirmDialog(String id) async {
             onPressed: _navigateToAddScreen,
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(60.0),
+          child: Padding(
+            padding: EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'ค้นหาด้วยชื่ออหรือรหัสวิชา',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                suffixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<List<Course>>(
-        future: fetchCourses(),
+        future: _futureCourses,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -133,15 +171,12 @@ Future<void> _showConfirmDialog(String id) async {
           } else {
             return InteractiveViewer(
               boundaryMargin: EdgeInsets.all(8.0),
-              minScale: 0.05,  // ปรับขนาดซูมเข้า
-              maxScale: 5.0,  // ปรับขนาดซูมออก
+              minScale: 0.05,
+              maxScale: 5.0,
               child: SingleChildScrollView(
                 child: Column(
-                  children: snapshot.data!.map((course) {
-                    //print('courseCode: ${course.courseCode}, name: ${course.name}'); // ตรวจสอบค่าที่ได้รับ
-                    // คำนวณการแสดงข้อมูล branch
+                  children: _filteredCourses.map((course) {
                     String branchDisplay = '';
-                   // print('branchIT: ${course.branchIT}, branchCS: ${course.branchCS}'); // ตรวจสอบค่าที่ได้รับ
                     if (course.branchIT == 1 && course.branchCS == 1) {
                       branchDisplay = 'IT,CS';
                     } else if (course.branchIT == 1) {
@@ -149,9 +184,6 @@ Future<void> _showConfirmDialog(String id) async {
                     } else if (course.branchCS == 1) {
                       branchDisplay = 'CS';
                     }
-
-                    // การพิมพ์ข้อมูลเพื่อทดสอบว่า branchDisplay ถูกคำนวณถูกต้องหรือไม่
-                    //print('branchDisplay: $branchDisplay');
 
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -181,34 +213,26 @@ Future<void> _showConfirmDialog(String id) async {
                                     style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   Text(course.name),
-                                  
-                                 // Text(branchDisplay), // แสดงข้อมูล branch
-                                 Text(branchDisplay,
+                                  Text(
+                                    branchDisplay,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.green, // สีเขียว
+                                      color: Colors.green,
                                     ),
                                   ),
-                                                    
-                                  
                                 ],
                               ),
                             ),
-                            
                             Row(
                               children: [
                                 IconButton(
                                   icon: Icon(Icons.edit),
-                                  onPressed: () => _navigateToEditScreen(course.id), // ส่ง courseCode เป็นพารามิเตอร์
+                                  onPressed: () => _navigateToEditScreen(course.id),
                                 ),
                                 IconButton(
                                   icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: (){ 
-                                _showConfirmDialog("${course.courseCode}");
-                                
-                              },    
-              )
-
+                                  onPressed: () => _showConfirmDialog(course.id),
+                                ),
                               ],
                             ),
                           ],
@@ -225,5 +249,3 @@ Future<void> _showConfirmDialog(String id) async {
     );
   }
 }
-
-

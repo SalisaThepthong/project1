@@ -17,7 +17,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
 
   Future<void> fetchGroups() async {
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:5000/groups'));
+      final response = await http.get(Uri.parse('http://10.0.2.2:5000/Profes/groups'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as List<dynamic>;
@@ -117,15 +117,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
                     
                     ),
                   ),
-                  // SizedBox(width: 10),
-                  // Text(
-                  //   "กลุ่ม 0${group.members.length.toString()}",
-                  //  //group.members.length.toString(),
-                  //   style: TextStyle(
-                  //    // fontWeight: FontWeight.bold,
-                  //     fontSize: 20.0,
-                  //   ),
-                  // ),
+                  
                 ],
               ),
               // trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
@@ -187,7 +179,7 @@ void _showActionMenu(BuildContext context, String groupId) {
     Future<void> _deleteGroup(BuildContext context, String groupId) async {
   try {
     final response =
-        await http.delete(Uri.parse('http://10.0.2.2:5000/delete_group/$groupId'));
+        await http.delete(Uri.parse('http://10.0.2.2:5000/Profes/delete_group/$groupId'));
 
     if (response.statusCode == 200) {
       Navigator.pop(context, true); // ใช้ context ที่ถูกส่งมาจากฟังก์ชัน
