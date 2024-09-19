@@ -5,6 +5,7 @@ from flask_cors import CORS
 from model import db
 from Api_pro import Profes_blueprint
 from Api_sub import subject_blueprint
+from Api_users import Users_blueprint
 
 
 
@@ -18,6 +19,7 @@ CORS(app)
 # ลงทะเบียนบลูปริ้นท์
 app.register_blueprint(Profes_blueprint, url_prefix='/Profes')
 app.register_blueprint(subject_blueprint, url_prefix='/subject')
+app.register_blueprint(Users_blueprint, url_prefix='/users')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

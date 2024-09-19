@@ -3,7 +3,6 @@ from flask import Blueprint, request, jsonify
 from model import db, Subject
 
 subject_blueprint = Blueprint('subject', __name__)
-# เพิ่มรายวิชา
 @subject_blueprint.route('/add_subject', methods=['POST'])
 def add_subject():
     data = request.json
@@ -18,6 +17,7 @@ def add_subject():
     db.session.add(new_subject)
     db.session.commit()
     return jsonify({'message': 'Subject added successfully'}), 201
+
 
 # แสดงรายวิชา
 @subject_blueprint.route('/showCourse', methods=['GET'])
@@ -44,7 +44,7 @@ def show_courses():
                 'branchIT': subject.branchIT,
                 'branchCS': subject.branchCS
             })
-            print(subjects_list)
+           # print(subjects_list)
 
         return jsonify(subjects_list)
     except Exception as e:
@@ -52,24 +52,51 @@ def show_courses():
         return jsonify({'message': 'Internal server error'}), 500
     
 #แก้ไขรายวิชา
-@subject_blueprint.route('/update_subject/<string:subject_id>', methods=['PUT'])
-def update_subject(subject_id):
-    data = request.json
-    subject = Subject.query.get(subject_id)
-    if subject:
-        subject.courseCode = data.get('courseCode', subject.courseCode)
-        subject.name_Subjects = data.get('name_Subjects', subject.name_Subjects)
-        subject.branchIT = data.get('branchIT', subject.branchIT)
-        subject.branchCS = data.get('branchCS', subject.branchCS)
-        db.session.commit()
-        return jsonify({'message': 'Subject updated successfully'})
-    else:
-        return jsonify({'error': 'Subject not found'}), 404
+# @subject_blueprint.route('/update_subject/<string:subject_id>', methods=['PUT'])
+# def update_subject(subject_id):
+#     data = request.json
+#     subject = Subject.query.get(subject_id)
+#     if subject:
+#         subject.courseCode = data.get('courseCode', subject.courseCode)
+#         subject.name_Subjects = data.get('name_Subjects', subject.name_Subjects)
+#         subject.branchIT = data.get('branchIT', subject.branchIT)
+#         subject.branchCS = data.get('branchCS', subject.branchCS)
+#         db.session.commit()
+#         return jsonify({'message': 'Subject updated successfully'})
+#     else:
+#         return jsonify({'error': 'Subject not found'}), 404
     
+@subject_blueprint.route('/updatesubject/<string:subject_id>', methods=['GET', 'PUT'])
+def handle_subject(subject_id):
+    if request.method == 'GET':
+        subject = Subject.query.get(subject_id)
+        if subject:
+            subject_data = {
+                'courseCode': subject.courseCode,
+                'name_Subjects': subject.name_Subjects,
+                'branchIT': subject.branchIT,
+                'branchCS': subject.branchCS
+            }
+            return jsonify(subject_data)
+        else:
+            return jsonify({'error': 'Subject not found'}), 404
+
+    elif request.method == 'PUT':
+        data = request.json
+        subject = Subject.query.get(subject_id)
+        if subject:
+            subject.courseCode = data.get('courseCode', subject.courseCode)
+            subject.name_Subjects = data.get('name_Subjects', subject.name_Subjects)
+            subject.branchIT = data.get('branchIT', subject.branchIT)
+            subject.branchCS = data.get('branchCS', subject.branchCS)
+            db.session.commit()
+            return jsonify({'message': 'Subject updated successfully'})
+        else:
+            return jsonify({'error': 'Subject not found'}), 404
 #ลบรายวิชา
 @subject_blueprint.route('/delete_subject/<string:id>', methods=['DELETE'])
 def delete_subject(id):
-    subject = Subject.query.filter_by(courseCode=id).first()
+    subject = Subject.query.filter_by(id_Subjects=id).first()
     if not subject:
         return jsonify({'message': 'Subject not found'}), 404
 

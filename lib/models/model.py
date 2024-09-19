@@ -2,7 +2,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import LargeBinary
 db = SQLAlchemy()
-
+from werkzeug.security import generate_password_hash, check_password_hash
 class Subject(db.Model):
     __tablename__ = 'subject'
     
@@ -36,3 +36,44 @@ class ContactProfes(db.Model):
 
     def __repr__(self):
         return f'<ContactProfes {self.id_Member} - {self.member_Name} {self.member_Lname}>'
+    
+
+class User(db.Model):
+    __tablename__ = 'users'
+    
+    id_User = db.Column(db.String(10), primary_key=True)
+    prefix = db.Column(db.String(10), nullable=False)         # คำนำหน้าชื่อ เช่น นาย, นาง, นางสาว
+    first_name = db.Column(db.String(50), nullable=False)      # ชื่อ
+    last_name = db.Column(db.String(50), nullable=False)       # นามสกุล
+    email = db.Column(db.String(100), unique=True, nullable=False)  # อีเมล (unique)
+    password = db.Column(db.String(255), nullable=False)       # รหัสผ่าน (เข้ารหัส)
+    role = db.Column(db.String(20), nullable=False)            # บทบาท เช่น แอดมิน, อาจารย์, นักศึกษา
+    created_at = db.Column(db.DateTime, server_default=db.func.now())  # วันที่สร้างข้อมูล
+    def __repr__(self):
+        return f'<User {self.id_User} - {self.prefix} {self.first_name} {self.last_name}>'
+
+
+    # ฟังก์ชันเข้ารหัสรหัสผ่าน
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    # ฟังก์ชันตรวจสอบรหัสผ่าน
+    
+    #id_User.set_password('melivecode')  # รหัสผ่านจะถูกแปลงเป็น hash ก่อนบันทึกลงฐานข้อมูล
+
+    # ฟังก์ชันตรวจสอบรหัสผ่าน
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    # ฟังก์ชันแปลง object ให้เป็น dictionary เพื่อง่ายต่อการแสดงผล
+    def to_dict(self):
+        return {
+            'id_User': self.id_User,
+            'prefix': self.prefix,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'role': self.role,
+            'created_at': self.created_at
+        }
+
