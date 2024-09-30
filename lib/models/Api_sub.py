@@ -1,6 +1,6 @@
 # subject_routes.py
 from flask import Blueprint, request, jsonify
-from model import db, Subject
+from model import User, db, Subject
 
 subject_blueprint = Blueprint('subject', __name__)
 @subject_blueprint.route('/add_subject', methods=['POST'])
@@ -12,7 +12,8 @@ def add_subject():
         courseCode=data['courseCode'],
         name_Subjects=data['name_Subjects'],
         branchIT=data['branchIT'],
-        branchCS=data['branchCS']
+        branchCS=data['branchCS'],
+        yearCourseSub=data['yearCourseSub']
     )
     db.session.add(new_subject)
     db.session.commit()
@@ -42,7 +43,8 @@ def show_courses():
                 'courseCode': subject.courseCode,
                 'name_Subjects': subject.name_Subjects,
                 'branchIT': subject.branchIT,
-                'branchCS': subject.branchCS
+                'branchCS': subject.branchCS,
+                'yearCourseSub':subject.yearCourseSub
             })
            # print(subjects_list)
 
@@ -51,20 +53,7 @@ def show_courses():
         print(f"Error occurred: {e}")
         return jsonify({'message': 'Internal server error'}), 500
     
-#แก้ไขรายวิชา
-# @subject_blueprint.route('/update_subject/<string:subject_id>', methods=['PUT'])
-# def update_subject(subject_id):
-#     data = request.json
-#     subject = Subject.query.get(subject_id)
-#     if subject:
-#         subject.courseCode = data.get('courseCode', subject.courseCode)
-#         subject.name_Subjects = data.get('name_Subjects', subject.name_Subjects)
-#         subject.branchIT = data.get('branchIT', subject.branchIT)
-#         subject.branchCS = data.get('branchCS', subject.branchCS)
-#         db.session.commit()
-#         return jsonify({'message': 'Subject updated successfully'})
-#     else:
-#         return jsonify({'error': 'Subject not found'}), 404
+
     
 @subject_blueprint.route('/updatesubject/<string:subject_id>', methods=['GET', 'PUT'])
 def handle_subject(subject_id):
@@ -75,7 +64,8 @@ def handle_subject(subject_id):
                 'courseCode': subject.courseCode,
                 'name_Subjects': subject.name_Subjects,
                 'branchIT': subject.branchIT,
-                'branchCS': subject.branchCS
+                'branchCS': subject.branchCS,
+                'yearCourseSub':subject.yearCourseSub
             }
             return jsonify(subject_data)
         else:
@@ -89,6 +79,7 @@ def handle_subject(subject_id):
             subject.name_Subjects = data.get('name_Subjects', subject.name_Subjects)
             subject.branchIT = data.get('branchIT', subject.branchIT)
             subject.branchCS = data.get('branchCS', subject.branchCS)
+            subject.yearCourseSub = data.get('yearCourseSub', subject.yearCourseSub)
             db.session.commit()
             return jsonify({'message': 'Subject updated successfully'})
         else:
@@ -107,3 +98,39 @@ def delete_subject(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': 'An error occurred while deleting the subject'}), 500
+
+
+
+
+
+#----------------------30/09/67
+@subject_blueprint.route('/subjects_by_branch', methods=['GET'])
+def get_subjects():
+    branch_it = request.args.get('branchIT', type=int)
+    branch_cs = request.args.get('branchCS', type=int)
+    year_course_sub = request.args.get('yearCourseSub')
+
+    subjects = Subject.query.filter(
+        (Subject.branchIT == branch_it) | (Subject.branchCS == branch_cs),
+        Subject.yearCourseSub == year_course_sub
+    ).all()
+
+    return jsonify([{
+        'courseCode': subject.courseCode,
+        'name_Subjects': subject.name_Subjects,
+    } for subject in subjects])
+
+@subject_blueprint.route('/user/<string:user_id>', methods=['GET'])
+def get_user_info(user_id):
+    user = User.query.get(user_id)
+    if user:
+        return jsonify({
+            'id_User': user.id_User,
+            'prefix': user.prefix,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        })
+    return jsonify({'error': 'User not found'}), 404
+
+# if __name__ == '__main__':
+#     app.run(debug=True)

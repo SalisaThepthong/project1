@@ -69,6 +69,7 @@ def login():
             "expiresIn": expires_in,
             "user": {
                 "id": user.id_User,
+                "prefix": user.prefix,
                 "fname": user.first_name,
                 "lname": user.last_name,
                 "username": user.email,

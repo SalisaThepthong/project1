@@ -11,6 +11,7 @@ class Subject(db.Model):
     name_Subjects = db.Column(db.String(100), nullable=False)
     branchIT = db.Column(db.Integer, nullable=False)
     branchCS = db.Column(db.Integer, nullable=False)
+    yearCourseSub = db.Column(db.String(5), nullable=False)
 
     def __repr__(self):
         return f'<Subject {self.id_Subjects} - {self.courseCode}>'
@@ -77,3 +78,36 @@ class User(db.Model):
             'created_at': self.created_at
         }
 
+
+# class GroupProject(db.Model):
+#     __tablename__ = 'groupproject'
+
+#     idGroupProject = db.Column(db.String(10), primary_key=True)
+#     project_Code = db.Column(db.String(50), nullable=False)
+#     name_Project_TH = db.Column(db.String(255), nullable=False)
+#     name_Project_EN = db.Column(db.String(255), nullable=False)
+#     CS_IT05D = db.Column(db.LargeBinary, nullable=False)  # ใช้ LargeBinary สำหรับ BLOB
+
+#     def __repr__(self):
+#         return f'<GroupProject {self.idGroupProject} - {self.project_Code}>'
+
+# # from flask_sqlalchemy import SQLAlchemy
+
+# # db = SQLAlchemy()
+
+# class Students(db.Model):
+#     __tablename__ = 'students'
+
+#     id_Students = db.Column(db.String(50), primary_key=True)
+#     code_Student = db.Column(db.String(50), nullable=False)
+#     educationSector = db.Column(db.String(100), nullable=False)
+#     year = db.Column(db.Integer, nullable=False)
+#     branch = db.Column(db.String(100), nullable=False)
+#     yearCourse = db.Column(db.Integer, nullable=False)
+#     overall_Grade = db.Column(db.Numeric(3, 2), nullable=False)
+#     id_User = db.Column(db.String(10), db.ForeignKey('users.id_User'), nullable=True)
+#     id_Member = db.Column(db.String(10), db.ForeignKey('contactprofes.id_Member'), nullable=True)
+#     idGroupProject = db.Column(db.Integer, db.ForeignKey('groupproject.idGroupProject'), nullable=True)
+
+#     def __repr__(self):
+#         return f'<Students {self.id_Students} - {self.code_Student}>'
