@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:myproject/lib/login/login_screen.dart';
+//import 'package:myproject/lib/login/login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -19,6 +19,7 @@ class _RegisterScreen extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   String _selectedPrefix = 'นาย'; // ค่าเริ่มต้นสำหรับคำนำหน้าชื่อ
+  List<String> _roles = ['แอดมิน', 'อาจารย์', 'นักศึกษา', 'อาจารย์และผู้ประสานงาน']; // เก็บบทบาทใน List
   String _selectedRole = 'นักศึกษา'; // ค่าเริ่มต้นสำหรับ Dropdown บทบาท
 
   final _formKey = GlobalKey<FormState>();
@@ -178,28 +179,26 @@ class _RegisterScreen extends State<RegisterScreen> {
                 ),
                 // Role Dropdown
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedRole,
-                    decoration: const InputDecoration(
-                      labelText: 'เลือกบทบาท',
-                      prefixIcon: Icon(Icons.group),
-                      border: OutlineInputBorder(),
-                    ),
-                    items: ['แอดมิน', 'อาจารย์', 'นักศึกษา']
-                        .map((role) => DropdownMenuItem<String>(
-                              value: role,
-                              child: Text(role),
-                            ))
-                        .toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedRole = newValue!;
-                      });
-                    },
-                  ),
-                ),
-                Row(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedRole,
+                          decoration: const InputDecoration(
+                            labelText: 'เลือกบทบาท',
+                            prefixIcon: Icon(Icons.group),
+                            border: OutlineInputBorder(),
+                          ),
+                          items: _roles.map((role) => DropdownMenuItem<String>(
+                            value: role,
+                            child: Text(role),
+                          )).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedRole = newValue!;
+                            });
+                          },
+                        ),
+                      ),
+                                      Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(

@@ -13,23 +13,7 @@ class GroupDetailScreen extends StatefulWidget {
 }
 
 class _GroupDetailScreenState extends State<GroupDetailScreen> {
-  // Future<void> _deleteGroup(String groupId) async {
-  //   try {
-  //     final response =
-  //         await http.delete(Uri.parse('http://10.0.2.2:5000/delete_group/$groupId'));
 
-  //     if (response.statusCode == 200) {
-        
-  //       Navigator.pop(context, true);
-  //     } else {
-  //       print('ไม่สามารถลบกลุ่มได้: ${response.statusCode}');
-  //       print('รายละเอียดการตอบกลับ: ${response.body}');
-  //     }
-  //   } catch (e) {
-  //     print('ข้อผิดพลาดในการลบกลุ่ม: $e');
-  //   }
-  // }
-///delete_member/<id_Profes>
   Future<void> _deleteMember(String id_Member) async {
     try {
       final response = await http.delete(Uri.parse('http://10.0.2.2:5000/Profes/delete_member/$id_Member'));

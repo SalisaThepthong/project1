@@ -18,7 +18,9 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
   final TextEditingController _courseCodeController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   String _selectedBranch = 'IT'; // Default branch
+  String _selectedYearCourseSub = '2560'; // Default year course
   List<String> branches = ['IT', 'CS', 'IT & CS']; // Branch list
+  List<String> yearCourseSub = ['2560', '2565']; // Year list
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
             : (data['branchCS'] == 1
                 ? 'CS'
                 : 'IT & CS');
+        _selectedYearCourseSub = data['yearCourseSub'] ?? '2560'; // Set selected year course
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +61,7 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
       body: jsonEncode(<String, dynamic>{
         'courseCode': _courseCodeController.text,
         'name_Subjects': _nameController.text,
+        'yearCourseSub': _selectedYearCourseSub, // ส่ง yearCourseSub ที่เลือก
         'branchIT': _selectedBranch.contains('IT') ? 1 : 0,
         'branchCS': _selectedBranch.contains('CS') ? 1 : 0,
       }),
@@ -149,6 +153,7 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
                 ),
                 validator: validateName,
               ),
+              
               SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 value: _selectedBranch,
@@ -165,6 +170,32 @@ class _EditSubjectScreenState extends State<EditSubjectScreen> {
                 },
                 decoration: InputDecoration(
                   labelText: 'Branch',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0), // Rounded border
+                    borderSide: BorderSide.none, // No border line
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  filled: true,
+                  fillColor: Colors.grey[200], // Background color of input field
+                ),
+              ),
+              SizedBox(height: 10),
+              //Text('Year Course'),
+              DropdownButtonFormField<String>(
+                value: _selectedYearCourseSub, // ค่าเริ่มต้นสำหรับปีการศึกษา
+                items: yearCourseSub.map((String year) {
+                  return DropdownMenuItem<String>(
+                    value: year,
+                    child: Text(year),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedYearCourseSub = newValue!; // อัปเดตค่าเมื่อเลือกปีการศึกษา
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Year Course',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0), // Rounded border
                     borderSide: BorderSide.none, // No border line

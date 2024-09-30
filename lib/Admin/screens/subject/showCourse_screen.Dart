@@ -10,6 +10,7 @@ class Course {
   final String name;
   final int branchIT;
   final int branchCS;
+  final String yearCourseSub;
 
   Course({
     required this.id,
@@ -17,6 +18,7 @@ class Course {
     required this.name,
     required this.branchIT,
     required this.branchCS,
+    required this.yearCourseSub,
   });
 
   factory Course.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class Course {
       name: json['name_Subjects'],
       branchIT: json['branchIT'] ?? 0,
       branchCS: json['branchCS'] ?? 0,
+      yearCourseSub: json['yearCourseSub'],
     );
   }
 }
@@ -220,6 +223,12 @@ class _ShowCourseScreenState extends State<ShowCourseScreen> {
                                       color: Colors.green,
                                     ),
                                   ),
+                                  Text(
+                                'หลักสูตร: ${course.yearCourseSub}', // เพิ่มปีการศึกษา
+                                 style: TextStyle(
+                                color: Colors.blue,
+                                      ),
+                                      ),
                                 ],
                               ),
                             ),
