@@ -89,13 +89,6 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
         title: Text(widget.group.name),
         backgroundColor: Colors.orange,
         actions: <Widget>[
-          // TextButton.icon(
-          //   icon: Icon(Icons.delete, color: Colors.red),
-          //   label: Text('ลบกลุ่ม', style: TextStyle(color: Colors.white)),
-          //   onPressed: () {
-          //     _showConfirmDialog(context, widget.group.id);
-          //   },
-          // ),
         ],
       ),
       body: ListView.builder(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'ProfilePage.dart';
 import 'CustomBottomNavigationBar.dart'; // นำเข้าไฟล์ใหม่
-import 'featureStep1.dart'; // นำเข้าไฟล์ใหม่สำหรับหน้า ProjectDetail
+import 'Project1/Step1_feature.dart'; // นำเข้าไฟล์ใหม่สำหรับหน้า ProjectDetail
 
 class HomeStudent extends StatefulWidget {
   final String username;
@@ -78,7 +78,13 @@ class _HomeStudentState extends State<HomeStudent> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FeatureStep1(), // ส่งชื่อโครงการไปยังหน้าใหม่
+                          builder: (context) => FeatureStep1(
+                            username: _username,
+                            prefix: _prefix,
+                            fname: _fname,
+                            lname: _lname,
+                            role: _role,
+                          ), // ส่งชื่อโครงการไปยังหน้าใหม่
                         ),
                       );
                     }

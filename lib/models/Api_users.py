@@ -81,3 +81,14 @@ def login():
 
     # ถ้ารหัสผ่านไม่ถูกต้อง
     return jsonify({"status": "error", "message": "Login failed"}), 401
+
+@Users_blueprint.route('/get_teachers', methods=['GET'])
+def get_teachers():
+    try:
+        # ดึงข้อมูลจากตาราง users ที่มี role เป็น 'อาจารย์' หรือ 'อาจารย์และผู้ประสานงาน'
+        teachers = User.query.filter(User.role.in_(['อาจารย์', 'อาจารย์และผู้ประสานงาน'])).all()
+        teachers_list = [{'prefix': teacher.prefix, 'first_name': teacher.first_name, 'last_name': teacher.last_name} for teacher in teachers]
+        
+        return jsonify(teachers_list), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

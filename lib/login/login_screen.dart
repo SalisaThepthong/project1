@@ -50,7 +50,12 @@ class _LoginScreenState extends State<LoginScreen> {
         if (role == 'แอดมิน') {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => HomeScreen(),  // หน้าของแอดมิน
+              builder: (context) => HomeAdminScreen(
+               // username: user['username'] ?? 'ไม่มีข้อมูล',
+                prefix: user['prefix'] ?? 'ไม่มีข้อมูล',
+                fname: user['fname'] ?? 'ไม่มีข้อมูล',
+                lname: user['lname'] ?? 'ไม่มีข้อมูล',
+              ),  // หน้าของแอดมิน
             ),
           );
         } else if (role == 'นักศึกษา') {

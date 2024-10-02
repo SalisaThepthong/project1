@@ -48,7 +48,7 @@ class User(db.Model):
     last_name = db.Column(db.String(50), nullable=False)       # นามสกุล
     email = db.Column(db.String(100), unique=True, nullable=False)  # อีเมล (unique)
     password = db.Column(db.String(255), nullable=False)       # รหัสผ่าน (เข้ารหัส)
-    role = db.Column(db.String(20), nullable=False)            # บทบาท เช่น แอดมิน, อาจารย์, นักศึกษา
+    role = db.Column(db.String(50), nullable=False)            # บทบาท เช่น แอดมิน, อาจารย์, นักศึกษา
     created_at = db.Column(db.DateTime, server_default=db.func.now())  # วันที่สร้างข้อมูล
     def __repr__(self):
         return f'<User {self.id_User} - {self.prefix} {self.first_name} {self.last_name}>'

@@ -3,8 +3,6 @@ import 'package:myproject/Admin/widgets/menu_item.dart';
 import 'package:myproject/Admin/screens/subject/showCourse_screen.dart';
 import 'package:myproject/Admin/screens/Profes/showGroupProfes_screen.dart';
 
-// หน้าจอหลักของแอป (HomeScreen)
-
 void main() {
   runApp(MyApp());
 }
@@ -14,23 +12,32 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'แอปมหาวิทยาลัย',
-       theme: ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'TorsilpKanittha', // ชื่อฟอนต์ที่ตั้งค่าไว้ใน pubspec.yaml
       ),
-      home: HomeScreen(),
+       home: HomeAdminScreen(prefix: 'prefix', fname: 'fname', lname: 'lname'), // เปลี่ยนพารามิเตอร์ตามต้องการ
     );
   }
 }
 
-// หน้าจอหลักของแอป (HomeScreen)
-class HomeScreen extends StatelessWidget {
+// หน้าจอหลักของแอป (HomeAdminScreen)
+class HomeAdminScreen extends StatelessWidget {
+  final String prefix;
+  final String fname;
+  final String lname;
+
+  const HomeAdminScreen({
+    Key? key,
+    required this.prefix,
+    required this.fname,
+    required this.lname,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final double iconSize =
-        MediaQuery.of(context).size.width * 0.1; // ขนาดไอคอนขึ้นกับหน้าจอ
-    final double fontSize =
-        MediaQuery.of(context).size.width * 0.04; // ขนาดฟอนต์ขึ้นกับหน้าจอ
+    final double iconSize = MediaQuery.of(context).size.width * 0.1; // ขนาดไอคอนขึ้นกับหน้าจอ
+    final double fontSize = MediaQuery.of(context).size.width * 0.04; // ขนาดฟอนต์ขึ้นกับหน้าจอ
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +46,6 @@ class HomeScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(3.0), // ลดขนาด Padding
         child: Transform.scale(
-          
           scale: 0.6, // ปรับขนาดการซูมของ GridView ที่ 80%
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -61,7 +67,11 @@ class HomeScreen extends StatelessWidget {
                   'icon': Icons.person,
                   'text': 'อาจารย์',
                   'color': Colors.orange.shade100,
-                  'screen':  GroupListScreen()
+                  'screen': GroupListScreen(
+                    prefix: prefix,
+                    fname: fname,
+                    lname: lname,
+                  )
                 },
                 {
                   'icon': Icons.person_off,
@@ -99,7 +109,8 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => items[index]['screen'] as Widget),
+                      builder: (context) => items[index]['screen'] as Widget,
+                    ),
                   );
                 },
               );
@@ -127,7 +138,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
 
 // หน้าต่าง ๆ ที่จะนำทางไป
 class TeacherScreen extends StatelessWidget {

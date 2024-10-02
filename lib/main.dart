@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myproject/login/login_screen.dart';
 
 import 'package:myproject/login/register_screen.dart'; // ตรวจสอบให้แน่ใจว่ามีไฟล์นี้อยู่
-import 'package:myproject/login/my_home_screen.dart'; 
+//import 'package:myproject/login/my_home_screen.dart'; 
 import 'package:myproject/Admin/screens/homeAdmin_screen.dart';
 import 'package:myproject/teacher/screens/HomeTeacher_Screen.dart';
 // import 'package:myproject/student/screens/HomeStudent_Screen.dart';
@@ -18,16 +18,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-  scaffoldBackgroundColor: const Color.fromARGB(255, 249, 252, 233),
-  colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 68, 62, 62)),
+  scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
+  colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 252, 169, 35)),
   useMaterial3: true,
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color.fromARGB(255, 107, 103, 101), // สีของ AppBar
+    backgroundColor: Color.fromARGB(255, 252, 169, 35), // สีของ AppBar
     foregroundColor: Colors.white, // สีของข้อความใน AppBar
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: const Color.fromARGB(255, 107, 103, 101), // สีปุ่มที่ต้องการ
+      backgroundColor: const Color.fromARGB(255, 252, 169, 35), // สีปุ่มที่ต้องการ
       foregroundColor: Colors.white, // สีตัวอักษรบนปุ่ม
     ),
   ),
@@ -42,8 +42,8 @@ class MyApp extends StatelessWidget {
        // '/': (context) => const MyHomeScreen(), // เพิ่มหน้าหลักที่ต้องการ
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
-        '/main': (context) => const MyHomeScreen(), // กำหนดเส้นทางไปยังหน้าหลัก
-        '/homeAdmin': (context) => HomeScreen(),
+        //'/main': (context) => const MyHomeScreen(), // กำหนดเส้นทางไปยังหน้าหลัก
+        //'/homeAdmin': (context) => HomeScreen(),
         '/homeTeacher': (context) => HomeTeacherScreen(),
         //'/homeStudent': (context) => HomeStudentScreen(),
       },

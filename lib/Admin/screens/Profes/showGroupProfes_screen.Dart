@@ -5,15 +5,31 @@ import 'package:myproject/Admin/screens/Profes/createGroup_screen.dart';
 import 'package:myproject/Admin/screens/Profes/group.dart';
 import 'package:myproject/Admin/screens/Profes/group_detail_screen.dart';
 import 'package:myproject/Admin/screens/Profes/editGroup_screen.dart';
-//import 'group_detail_screen.dart'; // import ไฟล์ที่แยกไว้
-
+//หน้าเอาไว้โชว์ข้อมูลอาจารย์ และสมาชิกทั้งหมด
 class GroupListScreen extends StatefulWidget {
+  final String prefix;
+  final String fname;
+  final String lname;
+
+  const GroupListScreen({
+    Key? key,
+    required this.prefix,
+    required this.fname,
+    required this.lname,
+  }) : super(key: key);
+
   @override
   _GroupListScreenState createState() => _GroupListScreenState();
 }
 
 class _GroupListScreenState extends State<GroupListScreen> {
-  List<Group> groups = [];
+  List<Group> groups = [];//สร้างตัวแปรเก็บข้อมูลกลุ่ม
+
+  @override
+  void initState() {//เรียกใช้งานฟังก์ชันเพื่อโหลดข้อมูลกลุ่ม
+    super.initState();
+    fetchGroups();
+  }
 
   Future<void> fetchGroups() async {
     try {
@@ -36,32 +52,125 @@ class _GroupListScreenState extends State<GroupListScreen> {
     }
   }
 
-  void _navigateToAddScreen() {
+  void _navigateToAddScreen() {//เปิดหน้าสร้างกลุ่ม
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CreateGroupScreen()),
-    );
+      MaterialPageRoute(//สร้างหน้าสร้างกลุ่ม
+        builder: (context) => CreateGroupScreen(//
+          prefix: widget.prefix,
+          fname: widget.fname,
+          lname: widget.lname,
+        ),
+      ),
+    ).then((value) {//ตรวจสอบว่าสร้างกลุ่มสําเร็จหรือไม่
+      if (value == true) {
+        fetchGroups();
+      }
+    });
   }
-// ไปหน้าจอ GroupDetailScreen
-  void _navigateToGroupDetailScreen(Group group) async {
+
+  void _navigateToGroupDetailScreen(Group group) async {//เปิดหน้ารายละเอียดกลุ่ม
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GroupDetailScreen(group: group),
+        builder: (context) => GroupDetailScreen(group: group),//สร้างหน้ารายละเอียดกลุ่ม
       ),
     );
-  
 
-    // รีเฟรชกลุ่มเมื่อกลับมาพร้อมผลการลบสำเร็จ
     if (result == true) {
       fetchGroups();
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchGroups();
+  void _navigateToEditScreen(String groupId) {//เปิดหน้าแก้ไขกลุ่ม
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditGroupScreen(groupId: groupId),    //สร้างหน้าแก้ไขกลุ่ม
+      ),
+    ).then((value) {
+      if (value == true) {
+        fetchGroups();
+      }
+    });
+  }
+
+  Future<void> _deleteGroup(String groupId) async {//ลบกลุ่ม
+    try {
+      final response = await http.delete(Uri.parse('http://10.0.2.2:5000/Profes/delete_group/$groupId'));
+
+      if (response.statusCode == 200) {
+        fetchGroups();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('กลุ่มถูกลบเรียบร้อยแล้ว')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ไม่สามารถลบกลุ่มได้')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('เกิดข้อผิดพลาดในการลบกลุ่ม')),
+      );
+    }
+  }
+
+  void _showActionMenu(String groupId) {//แสดงเมนูจัดการกลุ่ม
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.edit, color: Colors.blue),
+              title: Text('แก้ไขกลุ่ม'),
+              onTap: () {
+                Navigator.pop(context);
+                _navigateToEditScreen(groupId);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete, color: Colors.red),
+              title: Text('ลบกลุ่ม'),
+              onTap: () {
+                Navigator.pop(context);
+                _showConfirmDialog(groupId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showConfirmDialog(String groupId) async {//ยืนยันการลบ
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('ยืนยันการลบ'),
+          content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่มนี้?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('ยกเลิก'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: Text('ลบ'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _deleteGroup(groupId);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -96,37 +205,32 @@ class _GroupListScreenState extends State<GroupListScreen> {
                 ),
               ],
             ),
-     child: ListTile(
+            child: ListTile(
               contentPadding: EdgeInsets.all(16.0),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                      Icons.group, // ใช้ไอคอนที่คุณต้องการ
-                      color: Colors.brown, // สีของไอคอน
-                      size: 24.0, // ขนาดของไอคอน
-                    ),
-                    SizedBox(width: 10),
+                    Icons.group,
+                    color: Colors.brown,
+                    size: 24.0,
+                  ),
+                  SizedBox(width: 10),
                   Text(
-                     "กลุ่ม${group.name}",
-                    //group.name,
+                    "กลุ่ม${group.name}",
                     style: TextStyle(
                       color: Colors.brown,
-                      //fontWeight: FontWeight.bold,
                       fontSize: 20.0,
-                    
                     ),
                   ),
-                  
                 ],
               ),
-              // trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
               onTap: () {
                 _navigateToGroupDetailScreen(group);
               },
               trailing: IconButton(
                 icon: Icon(Icons.more_vert),
-                onPressed: () =>  _showActionMenu(context, group.id),
+                onPressed: () => _showActionMenu(group.id),
               ),
             ),
           );
@@ -134,88 +238,4 @@ class _GroupListScreenState extends State<GroupListScreen> {
       ),
     );
   }
-}
-
-void _showActionMenu(BuildContext context, String groupId) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.edit, color: Colors.blue),
-              title: Text('แก้ไขกลุ่ม'),
-              onTap: () {
-                Navigator.pop(context);
-                _navigateToEditScreen(context,groupId);
-                // Add your navigation to the edit screen here
-              //EditGroupScreen(context, groupId);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete, color: Colors.red),
-              title: Text('ลบกลุ่ม'),
-              onTap: () {
-                Navigator.pop(context);
-                _showConfirmDialog(context, groupId);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-  void _navigateToEditScreen(BuildContext context, String groupId) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => EditGroupScreen(groupId: groupId), // แก้เป็นการส่งค่า courseCode ให้ตรงกับที่ต้องการ
-    ),
-  );
-}
-
-  
-    Future<void> _deleteGroup(BuildContext context, String groupId) async {
-  try {
-    final response =
-        await http.delete(Uri.parse('http://10.0.2.2:5000/Profes/delete_group/$groupId'));
-
-    if (response.statusCode == 200) {
-      Navigator.pop(context, true); // ใช้ context ที่ถูกส่งมาจากฟังก์ชัน
-    } else {
-      print('ไม่สามารถลบกลุ่มได้: ${response.statusCode}');
-      print('รายละเอียดการตอบกลับ: ${response.body}');
-    }
-  } catch (e) {
-    print('ข้อผิดพลาดในการลบกลุ่ม: $e');
-  }
-}
-
-    Future<void> _showConfirmDialog(BuildContext context, String groupId) async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('ยืนยันการลบ'),
-        content: Text('คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่มนี้?'),
-        actions: <Widget>[
-          TextButton(
-            child: Text('ยกเลิก'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text('ลบ'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              _deleteGroup(context, groupId); // ส่ง context ไปยังฟังก์ชัน
-            },
-          ),
-        ],
-      );
-    },
-  );
 }

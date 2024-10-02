@@ -28,6 +28,59 @@ class ProfilePage extends StatelessWidget {
   }
 
   @override
+  Widget _buildUserInfo() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ข้อมูลผู้ใช้',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.person, color: Colors.blue),
+              SizedBox(width: 10),
+              Text('$prefix $fname $lname'),
+            ],
+          ),
+          SizedBox(height: 5),
+          Row(
+            children: [
+              Icon(Icons.email, color: Colors.green),
+              SizedBox(width: 10),
+              Text(username),
+            ],
+          ),
+          SizedBox(height: 5),
+          Row(
+            children: [
+              Icon(Icons.work, color: Colors.orange),
+              SizedBox(width: 10),
+              Text(role),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -35,85 +88,32 @@ class ProfilePage extends StatelessWidget {
         backgroundColor: const Color.fromARGB(255, 56, 47, 44),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout), // ไอคอนล็อกเอาต์
-            onPressed: () => _logout(context), // เรียกใช้ฟังก์ชันล็อกเอาต์เมื่อคลิก
+            icon: const Icon(Icons.logout),
+            onPressed: () => _logout(context),
           ),
         ],
       ),
-      body: 
-      Container(
-          color: Color.fromARGB(255, 252, 248, 227),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 255, 255, 255),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
+      body: Container(
+        color: Color.fromARGB(255, 252, 248, 227),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildUserInfo(),  // เรียกใช้ฟังก์ชันใหม่ที่สร้างขึ้น
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Center(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    height: 300.0,
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.email, size: 30, color: Color.fromARGB(255, 217, 110, 103)),
-                      const SizedBox(width: 10),
-                      Text(
-                        'อีเมล: $username',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      const Icon(Icons.person_outline, size: 30, color: Color.fromARGB(255, 131, 198, 133)),
-                      const SizedBox(width: 10),
-                      Text(
-                        'ชื่อ: $prefix $fname $lname',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      const Icon(Icons.star_outline_sharp, size: 30, color: Color.fromARGB(255, 55, 145, 173)),
-                      const SizedBox(width: 10),
-                      Text(
-                        'สถานะ: $role',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Center(
-                child: Image.asset(
-                  'assets/logo.png',
-                  height: 300.0,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: selectedIndex,
         onItemSelected: onItemTapped,
