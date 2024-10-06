@@ -7,6 +7,9 @@ class ProfilePage extends StatelessWidget {
   final String fname;
   final String lname;
   final String role;
+  final String id_User;
+  //final String id_group_project;
+
   final int selectedIndex;
   final Function(int) onItemTapped;
 
@@ -17,6 +20,8 @@ class ProfilePage extends StatelessWidget {
     required this.fname,
     required this.lname,
     required this.role,
+    required this.id_User,
+    //required this.id_group_project,
     required this.selectedIndex,
     required this.onItemTapped,
   });
@@ -122,6 +127,10 @@ class ProfilePage extends StatelessWidget {
         fname: fname,
         lname: lname,
         role: role,
+        id_User: id_User,
+       // id_group_project: id_group_project ,
+        //selectedIndex: selectedIndex,
+
       ),
     );
   }

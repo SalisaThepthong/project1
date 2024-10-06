@@ -13,10 +13,9 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
   final TextEditingController _courseCodeController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   String _selectedBranch = 'IT';
-  String _selectedYear = '2560'; // ตัวแปรสำหรับ yearCourseSub
+  int _selectedYear = 2560; // เริ่มต้นที่ปี พ.ศ. 2580 (2560 + 20 ปี)
   List<String> branches = ['IT', 'CS', 'IT & CS'];
-  List<String> yearCourseSub = ['2560', '2565']; // รายการของปีการศึกษา
-
+  
   Future<void> saveSubject() async {
     final Uri url = Uri.parse("http://10.0.2.2:5000/subject/add_subject");
 
@@ -30,7 +29,7 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
         'name_Subjects': _nameController.text,
         'branchIT': _selectedBranch == 'IT' || _selectedBranch == 'IT & CS' ? 1 : 0,
         'branchCS': _selectedBranch == 'CS' || _selectedBranch == 'IT & CS' ? 1 : 0,
-        'yearCourseSub': _selectedYear, // เพิ่มปีการศึกษาที่เลือกลงไปในข้อมูลที่ส่ง
+        'yearCourseSub': _selectedYear.toString(),
       }),
     );
 
@@ -42,7 +41,7 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       _nameController.clear();
       setState(() {
         _selectedBranch = branches[0];
-        _selectedYear = yearCourseSub[0]; // รีเซ็ตปีการศึกษา
+        _selectedYear = 2580;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,7 +49,8 @@ class _AddSubjectScreenState extends State<AddSubjectScreen> {
       );
     }
   }
-Future<void> showSuccessDialog() async {
+
+  Future<void> showSuccessDialog() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -76,6 +76,37 @@ Future<void> showSuccessDialog() async {
       },
     );
   }
+
+  void _selectYear(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('เลือกปีการศึกษา'),
+          content: Container(
+            width: double.maxFinite,
+            height: 300,
+            child: ListView.builder(
+              itemCount: 20, // แสดงปี พ.ศ. 2560 ถึง 3000
+              itemBuilder: (BuildContext context, int index) {
+                final int year = 2560 + index;
+                return ListTile(
+                  title: Text('$year'),
+                  onTap: () {
+                    setState(() {
+                      _selectedYear = year;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,28 +180,26 @@ Future<void> showSuccessDialog() async {
                 ),
               ),
               SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: _selectedYear,
-                items: yearCourseSub.map((String year) {
-                  return DropdownMenuItem<String>(
-                    value: year,
-                    child: Text(year),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedYear = newValue!;
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: 'ปีการศึกษา',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide.none,
+              InkWell(
+                onTap: () => _selectYear(context),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'ปีการศึกษา',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                    filled: true,
+                    fillColor: Colors.grey[200],
                   ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-                  filled: true,
-                  fillColor: Colors.grey[200],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('${_selectedYear}'),
+                      Icon(Icons.arrow_drop_down),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 20),

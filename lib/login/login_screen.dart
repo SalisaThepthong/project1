@@ -66,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 username: user['username'] ?? 'ไม่มีข้อมูล',
                 fname: user['fname'] ?? 'ไม่มีข้อมูล',
                 lname: user['lname'] ?? 'ไม่มีข้อมูล',
+                id_User: user['id'] ?? 'ไม่มีข้อมูล',
                 role: role,
               ),
             ),

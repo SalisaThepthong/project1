@@ -3,7 +3,7 @@ import 'package:myproject/login/login_screen.dart';
 
 import 'package:myproject/login/register_screen.dart'; // ตรวจสอบให้แน่ใจว่ามีไฟล์นี้อยู่
 //import 'package:myproject/login/my_home_screen.dart'; 
-import 'package:myproject/Admin/screens/homeAdmin_screen.dart';
+//import 'package:myproject/Admin/screens/homeAdmin_screen.dart';
 import 'package:myproject/teacher/screens/HomeTeacher_Screen.dart';
 // import 'package:myproject/student/screens/HomeStudent_Screen.dart';
 void main() {

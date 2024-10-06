@@ -2,13 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myproject/Admin/validator.dart';
-//หน้าสำหรับสร้างกลุ่ม
 
 class CreateGroupScreen extends StatefulWidget {
   final String prefix;
   final String fname;
   final String lname;
-  
+
   const CreateGroupScreen({
     Key? key,
     required this.prefix,
@@ -25,7 +24,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
   String _groupNumber = '';
   String _groupName = '';
-  List<Map<String, String>> _teacherOptions = [];
+  List<Map<String, dynamic>> _teacherOptions = [];
 
   late String _prefix;
   late String _fname;
@@ -40,36 +39,39 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     _lname = widget.lname;
   }
 
+
   Future<void> _fetchTeachers() async {
-    final uri = Uri.parse('http://10.0.2.2:5000/users/get_teachers');
-    try {
-      final response = await http.get(uri);
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        setState(() {
-          _teacherOptions = data.map((teacher) {
-            return {
-              'prefix': teacher['prefix'] as String,
-              'first_name': teacher['first_name'] as String,
-              'last_name': teacher['last_name'] as String
-            };
-          }).toList();
-        });
-      } else {
-        print('Failed to fetch teachers');
-      }
-    } catch (e) {
-      print('Error fetching teachers: $e');
+  final uri = Uri.parse('http://10.0.2.2:5000/users/get_teachers');
+  try {
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      print(data); // เพิ่มการพิมพ์ข้อมูลที่ได้จาก API
+      setState(() {
+        _teacherOptions = data.map((teacher) {
+          return {
+            'id_User': teacher['id_User'] as String,
+            'prefix': teacher['prefix'] as String,
+            'first_name': teacher['first_name'] as String,
+            'last_name': teacher['last_name'] as String
+          };
+        }).toList();
+      });
+     
+    } else {
+      print('Failed to fetch teachers');
     }
+  } catch (e) {
+    print('Error fetching teachers: $e');
   }
+}
+
 
   void _addMember() {
     setState(() {
       _members.add({
         'teacher': null,
-        'prefix': '',
-        'name': '',
-        'lname': '',
+        'id_User': null, // Add id_User field
         'email': '',
         'facebook': '',
       });
@@ -78,16 +80,15 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   Future<void> _submitData() async {
     if (_formKey.currentState!.validate()) {
-      final uri = Uri.parse('http://10.0.2.2:5000/Profes/add_group_and_members');
+      final uri =
+          Uri.parse('http://10.0.2.2:5000/Profes/add_group_and_members');
 
       final body = jsonEncode({
         'group_number': _groupNumber,
         'group_name': _groupName,
         'members': _members
             .map((member) => {
-                  'member_prefix': member['prefix'] ?? '',
-                  'member_name': member['name'] ?? '',
-                  'member_lname': member['lname'] ?? '',
+                  'id_User': member['id_User'],  // ส่ง id_User ไปที่ backend
                   'member_email': member['email'] ?? '',
                   'member_facebook': member['facebook'] ?? ''
                 })
@@ -110,6 +111,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             _groupName = '';
             _members.clear();
           });
+           Navigator.of(context).pop(true);//  ส่งค่ากลับไปหน้าก่อนหน้าหลังจากบันทึกสำเร็จ
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึกข้อมูล')),
@@ -229,26 +231,40 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                         DropdownButtonFormField<Map<String, String>>(
-                  value: (_members[index]['teacher'] as Map<String, String>?) ?? null,
-                  items: _teacherOptions.map((Map<String, String> teacher) {
-                    return DropdownMenuItem<Map<String, String>>(
-                      value: teacher,
-                      child: Text('${teacher['prefix']} ${teacher['first_name']} ${teacher['last_name']}'),
-                    );
-                  }).toList(),
-                  onChanged: (Map<String, String>? value) {
-                    setState(() {
-                      _members[index]['teacher'] = value;
-                      _members[index]['prefix'] = value?['prefix'] ?? '';
-                      _members[index]['name'] = value?['first_name'] ?? '';
-                      _members[index]['lname'] = value?['last_name'] ?? '';
-                    });
-                  },
-                              decoration: const InputDecoration(
-                                labelText: 'เลือกอาจารย์',
-                                border: InputBorder.none,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: DropdownButtonFormField<Map<String, dynamic>>(
+                                    value: (_members[index]['teacher'] as Map<String, dynamic>?) ?? null,
+                                    items: _teacherOptions.map((Map<String, dynamic> teacher) {
+                                      return DropdownMenuItem<Map<String, dynamic>>(
+                                        value: teacher,
+                                        child: Text(
+                                            '${teacher['prefix']} ${teacher['first_name']} ${teacher['last_name']}'),
+                                      );
+                                    }).toList(),
+                                    onChanged: (Map<String, dynamic>? value) {
+                                      setState(() {
+                                        _members[index]['teacher'] = value;
+                                        _members[index]['id_User'] = value?['id_User']; // Assign id_User
+                                      });
+                                    },
+                                    decoration: const InputDecoration(
+                                      labelText: 'เลือกอาจารย์',
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    setState(() {
+                                      _members.removeAt(index); // ลบสมาชิกจากรายการ
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
@@ -273,17 +289,23 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: _addMember,
-                    child: const Text('เพิ่มสมาชิกกลุ่ม'),
-                  ),
-                ),
+               Align(
+  alignment: Alignment.centerLeft,
+  child: ElevatedButton.icon(
+    icon: const Icon(Icons.add),
+    label: const Text('เพิ่มสมาชิก'),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.black, // Set button color to black
+    ),
+    onPressed: _addMember,
+  ),
+),
+
                 const SizedBox(height: 16),
                 Center(
                   child: ElevatedButton(
                     onPressed: showSuccessDialog,
-                    child: const Text('บันทึกข้อมูลกลุ่มและสมาชิก'),
+                    child: const Text('บันทึกการเพิ่มกลุ่ม'),
                   ),
                 ),
               ],

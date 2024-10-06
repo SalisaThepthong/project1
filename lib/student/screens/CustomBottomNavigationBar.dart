@@ -10,6 +10,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
   final String fname;
   final String lname;
   final String role;
+  final String id_User;
+  //final String id_group_project;
 
   const CustomBottomNavigationBar({
     Key? key,
@@ -20,6 +22,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
     required this.fname,
     required this.lname,
     required this.role,
+    required this.id_User,
+    //required this.id_group_project,
   }) : super(key: key);
 
   @override
@@ -36,6 +40,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
               fname: fname,
               lname: lname,
               role: role,
+              id_User: id_User,
+              //id_group_project: id_group_project,
               selectedIndex: index,
               onItemTapped: onItemSelected,
             ),
@@ -49,6 +55,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
               fname: fname,
               lname: lname,
               role: role,
+              id_User: id_User,
+              //id_group_project: id_group_project,
               //selectedIndex: index,
             ), // เปลี่ยนไปยัง HomeStudent
           ));

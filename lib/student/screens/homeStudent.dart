@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'ProfilePage.dart';
+import 'package:myproject/student/screens/ProfilePage.dart';
 import 'CustomBottomNavigationBar.dart'; // นำเข้าไฟล์ใหม่
-import 'Project1/Step1_feature.dart'; // นำเข้าไฟล์ใหม่สำหรับหน้า ProjectDetail
+import 'Project1/Step_feature/Step1_AddDataStudent.dart'; // นำเข้าไฟล์ใหม่สำหรับหน้า ProjectDetail
 
 class HomeStudent extends StatefulWidget {
   final String username;
@@ -9,7 +9,9 @@ class HomeStudent extends StatefulWidget {
   final String fname;
   final String lname;
   final String role;
-
+  final String id_User; 
+  //final String id_group_project;
+  
   const HomeStudent({
     super.key,
     required this.username,
@@ -17,6 +19,8 @@ class HomeStudent extends StatefulWidget {
     required this.fname,
     required this.lname,
     required this.role,
+    required this.id_User,
+   // required this.id_group_project,
   });
 
   @override
@@ -29,6 +33,8 @@ class _HomeStudentState extends State<HomeStudent> {
   late String _fname;
   late String _lname;
   late String _role;
+  late String _id_User;
+ // late String _id_group_project;
   int _selectedIndex = 1;
 
   @override
@@ -39,6 +45,8 @@ class _HomeStudentState extends State<HomeStudent> {
     _fname = widget.fname;
     _lname = widget.lname;
     _role = widget.role;
+    _id_User = widget.id_User;
+    //_id_group_project = widget.id_group_project;
   }
 
   void _onItemTapped(int index) {
@@ -78,12 +86,15 @@ class _HomeStudentState extends State<HomeStudent> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FeatureStep1(
+                          builder: (context) => AddMembers(
+                            
                             username: _username,
                             prefix: _prefix,
                             fname: _fname,
                             lname: _lname,
-                            role: _role,
+                           role: _role,
+                           id_User:_id_User,
+                          //id_group_project: _id_group_project,
                           ), // ส่งชื่อโครงการไปยังหน้าใหม่
                         ),
                       );
@@ -163,6 +174,8 @@ class _HomeStudentState extends State<HomeStudent> {
           fname: _fname,
           lname: _lname,
           role: _role,
+          id_User: _id_User,
+          //id_group_project: _id_group_project,
         ),
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:myproject/Admin/validator.dart';
+
 class EditGroupScreen extends StatefulWidget {
   final String groupId;
   const EditGroupScreen({Key? key, required this.groupId}) : super(key: key);
@@ -33,7 +33,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
   @override
   void initState() {
     super.initState();
-    fetchGroupDetails(widget.groupId); // Call the method to fetch group details
+    fetchGroupDetails(widget.groupId); // Fetch group details when screen is initialized
   }
 
   Future<void> fetchGroupDetails(String groupId) async {
@@ -41,7 +41,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
       final response = await http.get(Uri.parse('http://10.0.2.2:5000/Profes/group_and_members/$groupId'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Fetched Data: $data'); // Debug print to check the fetched data
+        print('Fetched Data: $data');
 
         final groupNumber = data['group_Number'].toString();
         final groupName = data['group_Name'] as String;
@@ -54,11 +54,11 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
           memberControllers = data['members'].map<Map<String, dynamic>>((member) {
             return {
               'id_Member': TextEditingController(text: member['id_Member']),
-              'member_Prefix': member['member_Prefix'],
-              'member_Name': TextEditingController(text: member['member_Name']),
-              'member_Lname': TextEditingController(text: member['member_Lname']),
-              'member_Email': TextEditingController(text: member['member_Email']),
-              'member_Facebook': TextEditingController(text: member['member_Facebook']),
+              'prefix': member['prefix'],
+              'first_name': TextEditingController(text: member['first_name']),
+              'last_name': TextEditingController(text: member['last_name']),
+              'email': TextEditingController(text: member['email']),
+              'facebook': TextEditingController(text: member['facebook']),
             };
           }).toList();
         });
@@ -81,11 +81,11 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
     final membersData = memberControllers.map((memberController) {
       return {
         'id_Member': memberController['id_Member']!.text,
-        'member_Prefix': memberController['member_Prefix'],
-        'member_Name': memberController['member_Name']!.text,
-        'member_Lname': memberController['member_Lname']!.text,
-        'member_Email': memberController['member_Email']!.text,
-        'member_Facebook': memberController['member_Facebook']!.text,
+        'prefix': memberController['prefix'],
+        'first_name': memberController['first_name']!.text,
+        'last_name': memberController['last_name']!.text,
+        'email': memberController['email']!.text,
+        'facebook': memberController['facebook']!.text,
       };
     }).toList();
 
@@ -103,10 +103,8 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Group and members updated successfully')),
       );
-      setState(() {
-        // Optional: Update state or refresh UI if needed
-        fetchGroupDetails(widget.groupId); // Refresh data
-      });
+      // กลับไปยังหน้าก่อนหน้า และ refresh ข้อมูลที่อัปเดต
+      Navigator.of(context).pop(true); // ส่งค่ากลับไปหน้าก่อนหน้าหลังจากอัปเดตสำเร็จ
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update group and members')),
@@ -120,6 +118,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
   }
 }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +128,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.teal, // กำหนดสีของ AppBar
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -147,10 +146,10 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                   return Column(
                     children: [
                       _buildStyledDropdownButton(index),
-                      _buildStyledTextField(memberControllers[index]['member_Name'], 'Member Name'),
-                      _buildStyledTextField(memberControllers[index]['member_Lname'], 'Member Last Name'),
-                      _buildStyledTextField(memberControllers[index]['member_Email'], 'Member Email'),
-                      _buildStyledTextField(memberControllers[index]['member_Facebook'], 'Member Facebook'),
+                      _buildStyledTextField(memberControllers[index]['first_name'], 'First Name'),
+                      _buildStyledTextField(memberControllers[index]['last_name'], 'Last Name'),
+                      _buildStyledTextField(memberControllers[index]['email'], 'Email'),
+                      _buildStyledTextField(memberControllers[index]['facebook'], 'Facebook'),
                       SizedBox(height: 20),
                     ],
                   );
@@ -159,7 +158,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_validateForm()) {
-                    showSuccessDialog(); // แสดง Dialog สำหรับยืนยันการบันทึก
+                    showSuccessDialog();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('กรุณาตรวจสอบข้อมูลอีกครั้ง')),
@@ -167,8 +166,8 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // สีของปุ่ม
-                  minimumSize: Size(double.infinity, 50), // ความยาวของปุ่ม
+                  backgroundColor: Colors.orange,
+                  minimumSize: Size(double.infinity, 50),
                 ),
                 child: Text('Finish'),
               ),
@@ -208,10 +207,10 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<String>(
-        value: memberControllers[index]['member_Prefix'],
+        value: memberControllers[index]['prefix'],
         onChanged: (String? newValue) {
           setState(() {
-            memberControllers[index]['member_Prefix'] = newValue!;
+            memberControllers[index]['prefix'] = newValue!;
           });
         },
         items: _prefixOptions.map<DropdownMenuItem<String>>((String value) {
@@ -221,19 +220,18 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
           );
         }).toList(),
         isExpanded: true,
-        underline: SizedBox(), // Remove the default underline
+        underline: SizedBox(),
         hint: Text('Select Prefix'),
       ),
     );
   }
 
-  // ฟังก์ชันสำหรับการตรวจสอบความถูกต้องของข้อมูล
   bool _validateForm() {
     for (var controller in memberControllers) {
-      if (controller['member_Name']!.text.isEmpty ||
-          controller['member_Lname']!.text.isEmpty ||
-          controller['member_Email']!.text.isEmpty ||
-          controller['member_Facebook']!.text.isEmpty) {
+      if (controller['first_name']!.text.isEmpty ||
+          controller['last_name']!.text.isEmpty ||
+          controller['email']!.text.isEmpty ||
+          controller['facebook']!.text.isEmpty) {
         return false;
       }
     }
@@ -251,14 +249,14 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
             TextButton(
               child: Text('ยกเลิก'),
               onPressed: () {
-                Navigator.of(context).pop(); // ปิด Dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: Text('ยืนยัน'),
               onPressed: () {
-                Navigator.of(context).pop(); // ปิด Dialog
-                updateGroup(); // เรียกฟังก์ชันที่ส่งข้อมูลไปยัง API
+                Navigator.of(context).pop();
+                updateGroup();
               },
             ),
           ],
