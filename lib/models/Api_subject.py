@@ -132,5 +132,19 @@ def get_user_info(user_id):
         })
     return jsonify({'error': 'User not found'}), 404
 
+@subject_blueprint.route('/branches', methods=['GET'])
+def get_branches():
+    # Query unique combinations of branch and year
+    branches = db.session.query(Subject.branchIT, Subject.branchCS, Subject.yearCourseSub).distinct().all()
+    
+    result = []
+    for branch in branches:
+        if branch.branchIT:
+            result.append(f"IT หลักสูตร {branch.yearCourseSub}")
+        if branch.branchCS:
+            result.append(f"CS หลักสูตร {branch.yearCourseSub}")
+    
+    return jsonify(result)
+
 # if __name__ == '__main__':
 #     app.run(debug=True)

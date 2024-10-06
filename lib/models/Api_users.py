@@ -87,8 +87,19 @@ def get_teachers():
     try:
         # ดึงข้อมูลจากตาราง users ที่มี role เป็น 'อาจารย์' หรือ 'อาจารย์และผู้ประสานงาน'
         teachers = User.query.filter(User.role.in_(['อาจารย์', 'อาจารย์และผู้ประสานงาน'])).all()
-        teachers_list = [{'prefix': teacher.prefix, 'first_name': teacher.first_name, 'last_name': teacher.last_name} for teacher in teachers]
+        
+        # เพิ่ม id_User ลงในข้อมูลที่ส่งกลับไป
+        teachers_list = [
+            {
+                'id_User': teacher.id_User,  # ส่ง id_User กลับไปด้วย
+                'prefix': teacher.prefix,
+                'first_name': teacher.first_name,
+                'last_name': teacher.last_name
+            }
+            for teacher in teachers
+        ]
         
         return jsonify(teachers_list), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+

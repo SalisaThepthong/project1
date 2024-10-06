@@ -4,7 +4,7 @@ from sqlalchemy import LargeBinary
 db = SQLAlchemy()
 from werkzeug.security import generate_password_hash, check_password_hash
 class Subject(db.Model):
-    __tablename__ = 'subject'
+    __tablename__ = 'subject' # ชื่อตาราง ในฐานข้อมูล
     
     id_Subjects = db.Column(db.String(10), primary_key=True)
     courseCode = db.Column(db.String(50), nullable=False)
@@ -24,20 +24,24 @@ class ContactGroup(db.Model):
     # Remove group_Photo column
 
 class ContactProfes(db.Model):
+    __tablename__ = 'contact_profes'
+
     id_Member = db.Column(db.String(10), primary_key=True)
-    member_Prefix = db.Column(db.String(10))
-    member_Name = db.Column(db.String(50))
-    member_Lname = db.Column(db.String(50))
-    member_Email = db.Column(db.String(100))
-    member_Facebook = db.Column(db.String(100))
-    # Remove member_Photo column
-    id_Group = db.Column(db.String(10), db.ForeignKey('contact_group.id_Group'))
+    member_Email = db.Column(db.String(100), nullable=True)
+    member_Facebook = db.Column(db.String(100), nullable=True)
 
+    # Foreign Keys
+    id_Group = db.Column(db.String(10), db.ForeignKey('contact_group.id_Group'), nullable=False)
+    id_User = db.Column(db.String(10), db.ForeignKey('users.id_User'), nullable=False)
 
+    # Relationships
+    group = db.relationship('ContactGroup', backref=db.backref('members', lazy=True))
+    user = db.relationship('User', backref=db.backref('members', lazy=True))
 
     def __repr__(self):
-        return f'<ContactProfes {self.id_Member} - {self.member_Name} {self.member_Lname}>'
-    
+
+        return f'<ContactProfes {self.id_Member} - {self.member_Email}>'
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -50,6 +54,9 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)       # รหัสผ่าน (เข้ารหัส)
     role = db.Column(db.String(50), nullable=False)            # บทบาท เช่น แอดมิน, อาจารย์, นักศึกษา
     created_at = db.Column(db.DateTime, server_default=db.func.now())  # วันที่สร้างข้อมูล
+
+    # Relationships
+    students = db.relationship('Students', back_populates='user')
     def __repr__(self):
         return f'<User {self.id_User} - {self.prefix} {self.first_name} {self.last_name}>'
 
@@ -78,36 +85,51 @@ class User(db.Model):
             'created_at': self.created_at
         }
 
+# โมเดลสำหรับตาราง GroupProject
+class GroupProject(db.Model):
+    __tablename__ = 'groupproject' # ชื่อตาราง ในฐานข้อมูล
+    
+    id_GroupProject = db.Column(db.String(10), primary_key=True)
+    project_Code = db.Column(db.String(50), nullable=True)
+    name_Project_TH = db.Column(db.String(255), nullable=True)
+    name_Project_EN = db.Column(db.String(255), nullable=True)
+    CS_IT05D = db.Column(db.LargeBinary, nullable=True)  # BLOB สำหรับเก็บไฟล์ PDF
 
-# class GroupProject(db.Model):
-#     __tablename__ = 'groupproject'
+    students = db.relationship("Students", back_populates="group_project")
 
-#     idGroupProject = db.Column(db.String(10), primary_key=True)
-#     project_Code = db.Column(db.String(50), nullable=False)
-#     name_Project_TH = db.Column(db.String(255), nullable=False)
-#     name_Project_EN = db.Column(db.String(255), nullable=False)
-#     CS_IT05D = db.Column(db.LargeBinary, nullable=False)  # ใช้ LargeBinary สำหรับ BLOB
+# โมเดลสำหรับตาราง Students
+class Students(db.Model): 
+    __tablename__ = 'students'
+    
+    # คอลัมน์
+    id_Students = db.Column(db.String(10), primary_key=True)
+    prefix = db.Column(db.String(10), nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    code_Student = db.Column(db.String(10), nullable=False)
+    educationSector = db.Column(db.String(10), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    branch = db.Column(db.String(100), nullable=False)
+    yearCourse = db.Column(db.Integer, nullable=False)
+    overall_Grade = db.Column(db.Numeric(3, 2), nullable=True)
+    
+    id_User = db.Column(db.String(10), db.ForeignKey('users.id_User'), nullable=False)
+    id_GroupProject = db.Column(db.String(10), db.ForeignKey('groupproject.id_GroupProject'))  # ForeignKey ที่ถูกต้อง
 
-#     def __repr__(self):
-#         return f'<GroupProject {self.idGroupProject} - {self.project_Code}>'
-
-# # from flask_sqlalchemy import SQLAlchemy
-
-# # db = SQLAlchemy()
-
-# class Students(db.Model):
-#     __tablename__ = 'students'
-
-#     id_Students = db.Column(db.String(50), primary_key=True)
-#     code_Student = db.Column(db.String(50), nullable=False)
-#     educationSector = db.Column(db.String(100), nullable=False)
-#     year = db.Column(db.Integer, nullable=False)
-#     branch = db.Column(db.String(100), nullable=False)
-#     yearCourse = db.Column(db.Integer, nullable=False)
-#     overall_Grade = db.Column(db.Numeric(3, 2), nullable=False)
-#     id_User = db.Column(db.String(10), db.ForeignKey('users.id_User'), nullable=True)
-#     id_Member = db.Column(db.String(10), db.ForeignKey('contactprofes.id_Member'), nullable=True)
-#     idGroupProject = db.Column(db.Integer, db.ForeignKey('groupproject.idGroupProject'), nullable=True)
-
-#     def __repr__(self):
-#         return f'<Students {self.id_Students} - {self.code_Student}>'
+    # ความสัมพันธ์
+    user = db.relationship("User", back_populates="students")
+    group_project = db.relationship("GroupProject", back_populates="students")
+    
+    # Constructor ที่รองรับ id_group_project
+    def __init__(self, id_Students, prefix, first_name, last_name, code_Student, educationSector, year, branch, yearCourse, id_User, id_group_project):
+        self.id_Students = id_Students
+        self.prefix = prefix
+        self.first_name = first_name
+        self.last_name = last_name
+        self.code_Student = code_Student
+        self.educationSector = educationSector
+        self.year = year
+        self.branch = branch
+        self.yearCourse = yearCourse
+        self.id_User = id_User
+        self.id_group_project = id_group_project
