@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';class Member {
+import 'package:flutter/material.dart';
+
+class Member {
   String? prefix;
   String firstName;
   String lastName;
@@ -11,7 +13,7 @@ import 'package:flutter/material.dart';class Member {
   TextEditingController studentIdController = TextEditingController();
 
   Member({
-    this.prefix,
+    required this.prefix,
     required this.firstName,
     required this.lastName,
     required this.userId,

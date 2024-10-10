@@ -57,6 +57,7 @@ class User(db.Model):
 
     # Relationships
     students = db.relationship('Students', back_populates='user')
+    
     def __repr__(self):
         return f'<User {self.id_User} - {self.prefix} {self.first_name} {self.last_name}>'
 
@@ -87,21 +88,19 @@ class User(db.Model):
 
 # โมเดลสำหรับตาราง GroupProject
 class GroupProject(db.Model):
-    __tablename__ = 'groupproject' # ชื่อตาราง ในฐานข้อมูล
+    __tablename__ = 'groupproject'
     
     id_GroupProject = db.Column(db.String(10), primary_key=True)
     project_Code = db.Column(db.String(50), nullable=True)
     name_Project_TH = db.Column(db.String(255), nullable=True)
     name_Project_EN = db.Column(db.String(255), nullable=True)
-    CS_IT05D = db.Column(db.LargeBinary, nullable=True)  # BLOB สำหรับเก็บไฟล์ PDF
+    CS_IT05D = db.Column(db.LargeBinary, nullable=True)
 
     students = db.relationship("Students", back_populates="group_project")
 
-# โมเดลสำหรับตาราง Students
 class Students(db.Model): 
     __tablename__ = 'students'
     
-    # คอลัมน์
     id_Students = db.Column(db.String(10), primary_key=True)
     prefix = db.Column(db.String(10), nullable=False)
     first_name = db.Column(db.String(50), nullable=False)
@@ -114,14 +113,12 @@ class Students(db.Model):
     overall_Grade = db.Column(db.Numeric(3, 2), nullable=True)
     
     id_User = db.Column(db.String(10), db.ForeignKey('users.id_User'), nullable=False)
-    id_GroupProject = db.Column(db.String(10), db.ForeignKey('groupproject.id_GroupProject'))  # ForeignKey ที่ถูกต้อง
+    id_GroupProject = db.Column(db.String(10), db.ForeignKey('groupproject.id_GroupProject'), nullable=False)
 
-    # ความสัมพันธ์
     user = db.relationship("User", back_populates="students")
     group_project = db.relationship("GroupProject", back_populates="students")
     
-    # Constructor ที่รองรับ id_group_project
-    def __init__(self, id_Students, prefix, first_name, last_name, code_Student, educationSector, year, branch, yearCourse, id_User, id_group_project):
+    def __init__(self, id_Students, prefix, first_name, last_name, code_Student, educationSector, year, branch, yearCourse, id_User, id_GroupProject):
         self.id_Students = id_Students
         self.prefix = prefix
         self.first_name = first_name
@@ -132,4 +129,4 @@ class Students(db.Model):
         self.branch = branch
         self.yearCourse = yearCourse
         self.id_User = id_User
-        self.id_group_project = id_group_project
+        self.id_GroupProject = id_GroupProject

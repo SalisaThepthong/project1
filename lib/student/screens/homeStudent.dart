@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:myproject/student/screens/ProfilePage.dart';
 import 'CustomBottomNavigationBar.dart'; // นำเข้าไฟล์ใหม่
-import 'Project1/Step_feature/Step1_AddDataStudent.dart'; // นำเข้าไฟล์ใหม่สำหรับหน้า ProjectDetail
+import '../Project1/Step_feature/Step1_addGroupAndStudent/screens/add_members_screen.dart'; // นำเข้าไฟล์ใหม่สำหรับหน้า ProjectDetail
 
 class HomeStudent extends StatefulWidget {
   final String username;
@@ -86,7 +85,7 @@ class _HomeStudentState extends State<HomeStudent> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AddMembers(
+                          builder: (context) => AddMembersScreen(
                             
                             username: _username,
                             prefix: _prefix,
