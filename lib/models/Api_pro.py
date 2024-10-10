@@ -105,35 +105,8 @@ def add_group_and_members():
         db.session.rollback()
         return jsonify({'message': str(e)}), 500
 
-# แสดงกลุ่ม และ สมาชิก
-# @Profes_blueprint.route('/groups', methods=['GET'])
-# def get_groups():
-#     try:
-#         groups = ContactGroup.query.all()
-#         result = []
-#         for group in groups:
-#             members = ContactProfes.query.filter_by(id_Group=group.id_Group).all()
-#             member_list = [
-#                 {
-#                     'id': member.id_Member,
-#                     'prefix': member.member_Prefix,
-#                     'name': member.member_Name,
-#                     'lastName': member.member_Lname,
-#                     'email': member.member_Email,
-#                     'facebook': member.member_Facebook
-#                 }
-#                 for member in members
-#             ]
-#             result.append({
-#                 'id': group.id_Group,
-#                 'name': group.group_Name,
-#                 'members': member_list
-#             })
-#         return jsonify(result)
-#     except Exception as e:
-#         return jsonify({'message': str(e)}), 500
 
-@Profes_blueprint.route('/groups', methods=['GET'])
+@Profes_blueprint.route('/groups', methods=['GET'])# ดึงข้อมูลกลุ่ม
 def get_groups():
     try:
         groups = ContactGroup.query.all()
@@ -213,76 +186,10 @@ def delete_member(id_Member):
         db.session.rollback()
         return jsonify({'message': str(e)}), 500
     
-
-#     # จัดการกลุ่มและสมาชิก
-# @Profes_blueprint.route('/group_and_members/<string:group_id>', methods=['GET', 'PUT'])
-# def manage_group_and_members(group_id):
-#     # Handle GET request
-#     if request.method == 'GET':
-#         try:
-#             # Fetch the group by group_id
-#             group = ContactGroup.query.filter_by(id_Group=group_id).first()
-#             if not group:
-#                 return jsonify({'message': 'Group not found'}), 404
-
-#             # Fetch all members in the group (if needed later)
-#             members = ContactProfes.query.filter_by(id_Group=group_id).all()
-#             member_list = []
-#             for member in members:
-#                 member_data = {
-#                     'id_Member': member.id_Member,
-#                     'member_Prefix': member.member_Prefix,
-#                     'member_Name': member.member_Name,
-#                     'member_Lname': member.member_Lname,
-#                     'member_Email': member.member_Email,
-#                     'member_Facebook': member.member_Facebook,
-#                 }
-#                 member_list.append(member_data)
-
-#             # Prepare the response data for the group and its members
-#             group_data = {
-#                 'group_Number': group.group_Number,
-#                 'group_Name': group.group_Name,
-#                 'members': member_list
-#             }
-#             return jsonify(group_data), 200
-
-#         except Exception as e:
-#             return jsonify({'message': 'An error occurred while fetching group and members data', 'error': str(e)}), 500
-
-#     # Handle PUT request
-#     elif request.method == 'PUT':
-#         data = request.json
-#         try:
-#             # Update the group
-#             group = ContactGroup.query.filter_by(id_Group=group_id).first()
-#             if not group:
-#                 return jsonify({'message': 'Group not found'}), 404
-
-#             group.group_Number = data.get('group_Number', group.group_Number)
-#             group.group_Name = data.get('group_Name', group.group_Name)
-
-#             # Update members (optional - if needed later)
-#             members_data = data.get('members', [])
-#             for member_data in members_data:
-#                 member = ContactProfes.query.filter_by(id_Member=member_data['id_Member'], id_Group=group_id).first()
-#                 if member:
-#                     member.member_Prefix = member_data.get('member_Prefix', member.member_Prefix)
-#                     member.member_Name = member_data.get('member_Name', member.member_Name)
-#                     member.member_Lname = member_data.get('member_Lname', member.member_Lname)
-#                     member.member_Email = member_data.get('member_Email', member.member_Email)
-#                     member.member_Facebook = member_data.get('member_Facebook', member.member_Facebook)
-
-#             # Commit the changes
-#             db.session.commit()
-#             return jsonify({'message': 'Group and members updated successfully'}), 200
-
-#         except Exception as e:
-#             return jsonify({'message': 'An error occurred while updating group and members data', 'error': str(e)}), 500
-
+# จัดการกลุ่มและสมาชิก (ดึงข้อมูลกลุ่มและสมาชิก) แก้ไข ข้อมูลกลุ่มและสมาชิก
 @Profes_blueprint.route('/group_and_members/<string:group_id>', methods=['GET', 'PUT'])
 def manage_group_and_members(group_id):
-    # Handle GET request
+    # คือการดึงข้อมูลกลุ่มและสมาชิก
     if request.method == 'GET':
         try:
             # Fetch the group by group_id

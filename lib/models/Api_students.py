@@ -4,31 +4,25 @@ from model import Students, db, GroupProject
 
 students_blueprint = Blueprint('students', __name__)
 
-
-
-@students_blueprint.route('/add_group_and_student', methods=['POST'])
+@students_blueprint.route('/add_group_and_student', methods=['POST']) 
 def add_group_and_student():
     data = request.get_json()
 
-    # ตรวจสอบว่ามีข้อมูลที่จำเป็นหรือไม่
     if 'students' not in data or len(data['students']) < 1:
-        return jsonify({'message': 'Error: At least one student is required.'}), 400
+        return jsonify({'message': 'Error: ได้รับข้อมูลไม่ครบ กรุณาตรวจสอบ และลองอีกครั้ง'}), 400
 
     try:
         # สร้างกลุ่มใหม่สำหรับนักเรียน
-        new_group_id = 'GP' + str(GroupProject.query.count() + 1).zfill(2)  # สร้างรหัสกลุ่มโครงการใหม่
-
-        # สร้างกลุ่มโปรเจกต์
+        new_group_id = 'GP' + str(GroupProject.query.count() + 1).zfill(2)
         new_group = GroupProject(id_GroupProject=new_group_id)
-
-        db.session.add(new_group)  # เพิ่มกลุ่มโปรเจกต์
-        db.session.flush()  # เพื่อให้ได้ id_GroupProject ที่ถูกต้อง
+        db.session.add(new_group)
+        db.session.flush()
 
         for student_data in data['students']:
-            # สร้างรหัสนักเรียนใหม่
-            new_student_id = 'S' + str(Students.query.count() + 1).zfill(2)  # สร้างรหัสนักเรียนใหม่
+            if not student_data.get('id_User'):
+                raise ValueError("id_User is required for all students")
 
-            # เพิ่มนักเรียนลงในกลุ่มที่สร้างขึ้น
+            new_student_id = 'S' + str(Students.query.count() + 1).zfill(2)
             new_student = Students(
                 id_Students=new_student_id,
                 prefix=student_data['prefix'],
@@ -40,16 +34,18 @@ def add_group_and_student():
                 branch=student_data['branch'],
                 yearCourse=int(student_data['yearCourse']),
                 id_User=student_data['id_User'],
-                id_group_project=new_group.id_GroupProject  # ใช้ ID กลุ่มที่สร้างขึ้น
+                id_group_project=new_group.id_GroupProject
             )
             db.session.add(new_student)
 
-        db.session.commit()  # คอมมิตการเพิ่มนักเรียน
-
-        return jsonify({'message': 'Group Project and Students added successfully!'}), 201
-    except IntegrityError:
+        db.session.commit()
+        return jsonify({'message': 'เพิ่มกลุ่มโปรเจกต์และนักเรียนเรียบร้อยแล้ว', 'group_id': new_group_id}), 201
+    except ValueError as e:
         db.session.rollback()
-        return jsonify({'message': 'Error: ID already exists.'}), 400
+        return jsonify({'message': str(e)}), 400
+    except IntegrityError as e:
+        db.session.rollback()
+        return jsonify({'message': f'Error: ข้อมูลไม่ถูกต้องหรือซ้ำ: {str(e)}'}), 400
     except Exception as e:
         db.session.rollback()
         print(e)
