@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:myproject/login/register_screen.dart';
+import 'package:myproject/student/homestudent/screens/home_student_screen.dart';
 import 'package:myproject/student/screens/homeStudent.dart';
 import 'package:myproject/Admin/screens/homeAdmin_screen.dart';
 
@@ -61,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (role == 'นักศึกษา') {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => HomeStudent(
+              builder: (context) => HomeStudentScreen(
                 prefix: user['prefix'] ?? 'ไม่มีข้อมูล',
                 username: user['username'] ?? 'ไม่มีข้อมูล',
                 fname: user['fname'] ?? 'ไม่มีข้อมูล',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'CustomBottomNavigationBar.dart'; // นำเข้าไฟล์ใหม่
+import 'package:myproject/student/custom_bottomn_avigationbar_student.dart';
+
+//import 'package:myproject/student/custom_bottomn_avigationbar_student.dart' // นำเข้าไฟล์ใหม่
 
 class ProfilePage extends StatelessWidget {
   final String prefix;
@@ -128,8 +130,7 @@ class ProfilePage extends StatelessWidget {
         lname: lname,
         role: role,
         id_User: id_User,
-       // id_group_project: id_group_project ,
-        //selectedIndex: selectedIndex,
+      
 
       ),
     );

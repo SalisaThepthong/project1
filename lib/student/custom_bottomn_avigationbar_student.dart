@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ProfilePage.dart'; // นำเข้า ProfilePage
-import 'homeStudent.dart'; // นำเข้า HomeStudent
+import 'package:myproject/student/homestudent/screens/home_student_screen.dart';
+import 'screens/ProfilePage.dart'; // นำเข้า ProfilePage
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -41,7 +41,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
               lname: lname,
               role: role,
               id_User: id_User,
-              //id_group_project: id_group_project,
               selectedIndex: index,
               onItemTapped: onItemSelected,
             ),
@@ -49,15 +48,13 @@ class CustomBottomNavigationBar extends StatelessWidget {
         } else if (index == 1) {
           // เมื่อคลิกแท็บ "Home"
           Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => HomeStudent(
+            builder: (context) => HomeStudentScreen(
               username: username,
               prefix: prefix,
               fname: fname,
               lname: lname,
               role: role,
               id_User: id_User,
-              //id_group_project: id_group_project,
-              //selectedIndex: index,
             ), // เปลี่ยนไปยัง HomeStudent
           ));
         } else {
